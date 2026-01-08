@@ -12,6 +12,8 @@ interface ArchetypeBreakdown {
   name: string;
   percentage: number;
   description: string;
+  shadow: string;
+  shadowDescription: string;
 }
 
 interface AssessmentResults {
@@ -289,10 +291,30 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
   };
 
   const archetypeInfo = {
-    hero: { name: 'The Hero', description: 'Driven by ownership and results. Takes charge in crisis.' },
-    judge: { name: 'The Judge', description: 'Driven by standards, logic, and fairness.' },
-    teacher: { name: 'The Teacher', description: 'Driven by growth and developing potential.' },
-    servant: { name: 'The Servant', description: 'Driven by harmony and supporting others.' },
+    hero: { 
+      name: 'The Hero', 
+      description: 'Driven by ownership and results. Takes charge in crisis.',
+      shadow: 'Martyr Syndrome',
+      shadowDescription: 'Prone to burnout and micromanagement. Believes "if I don\'t do it, it fails." Struggles to delegate and takes on too much personal responsibility.',
+    },
+    judge: { 
+      name: 'The Judge', 
+      description: 'Driven by standards, logic, and fairness.',
+      shadow: 'Analysis Paralysis',
+      shadowDescription: 'Prone to rigidity and lack of empathy. Values rules over people. Can become cold or detached when making decisions.',
+    },
+    teacher: { 
+      name: 'The Teacher', 
+      description: 'Driven by growth and developing potential.',
+      shadow: 'Perpetual Patience',
+      shadowDescription: 'Prone to slow execution and tolerating underperformance too long. Focuses on the future at the expense of present results.',
+    },
+    servant: { 
+      name: 'The Servant', 
+      description: 'Driven by harmony and supporting others.',
+      shadow: 'Empathy Fatigue',
+      shadowDescription: 'Prone to conflict avoidance and lack of decisiveness. Shields the team to their own detriment and struggles with critical feedback.',
+    },
   };
 
   const calculateArchetypeBreakdown = (): { primary: string; breakdown: ArchetypeBreakdown[] } => {
@@ -306,11 +328,16 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
     const totalScore = Object.values(scores).reduce((sum, s) => sum + s, 0);
     
     const breakdown: ArchetypeBreakdown[] = Object.entries(scores)
-      .map(([key, score]) => ({
-        name: archetypeInfo[key as keyof typeof archetypeInfo].name,
-        percentage: totalScore > 0 ? Math.round((score / totalScore) * 100) : 25,
-        description: archetypeInfo[key as keyof typeof archetypeInfo].description,
-      }))
+      .map(([key, score]) => {
+        const info = archetypeInfo[key as keyof typeof archetypeInfo];
+        return {
+          name: info.name,
+          percentage: totalScore > 0 ? Math.round((score / totalScore) * 100) : 25,
+          description: info.description,
+          shadow: info.shadow,
+          shadowDescription: info.shadowDescription,
+        };
+      })
       .sort((a, b) => b.percentage - a.percentage);
 
     return { primary: breakdown[0].name, breakdown };
@@ -497,7 +524,7 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                   </div>
 
                   {/* All Archetypes Breakdown */}
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     {archetypeBreakdown.map((archetype, index) => (
                       <motion.div
                         key={archetype.name}
@@ -507,7 +534,7 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                         className="space-y-2"
                       >
                         <div className="flex items-center justify-between">
-                          <div>
+                          <div className="flex-1">
                             <span className={`font-medium ${index === 0 ? 'text-primary' : 'text-foreground'}`}>
                               {archetype.name}
                             </span>
@@ -527,6 +554,30 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                             }`}
                           />
                         </div>
+                        {/* Shadow Analysis */}
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          transition={{ delay: 0.7 + index * 0.1 }}
+                          className={`rounded-lg p-3 mt-2 ${
+                            index === 0 
+                              ? 'bg-destructive/10 border border-destructive/20' 
+                              : 'bg-muted/30 border border-border/30'
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className={`text-xs font-semibold uppercase tracking-wider ${
+                              index === 0 ? 'text-destructive' : 'text-muted-foreground'
+                            }`}>
+                              Shadow: {archetype.shadow}
+                            </span>
+                          </div>
+                          <p className={`text-xs mt-1 ${
+                            index === 0 ? 'text-destructive/80' : 'text-muted-foreground/70'
+                          }`}>
+                            {archetype.shadowDescription}
+                          </p>
+                        </motion.div>
                       </motion.div>
                     ))}
                   </div>
