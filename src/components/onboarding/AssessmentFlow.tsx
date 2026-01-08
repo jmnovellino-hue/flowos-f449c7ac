@@ -8,8 +8,15 @@ interface AssessmentFlowProps {
   onComplete: (results: AssessmentResults) => void;
 }
 
+interface ArchetypeBreakdown {
+  name: string;
+  percentage: number;
+  description: string;
+}
+
 interface AssessmentResults {
   archetype: string;
+  archetypeBreakdown: ArchetypeBreakdown[];
   values: string[];
   iceberg: {
     behavior: string;
@@ -241,7 +248,7 @@ const icebergPrompts = [
 ];
 
 export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
-  const [phase, setPhase] = useState<'archetype' | 'compass' | 'values' | 'iceberg'>('archetype');
+  const [phase, setPhase] = useState<'archetype' | 'results' | 'compass' | 'values' | 'iceberg'>('archetype');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [archetypeAnswers, setArchetypeAnswers] = useState<Record<number, number>>({});
   const [compassAnswers, setCompassAnswers] = useState<Record<number, string[]>>({});
@@ -281,26 +288,36 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
       .slice(0, 5);
   };
 
-  const calculateArchetype = () => {
+  const archetypeInfo = {
+    hero: { name: 'The Hero', description: 'Driven by ownership and results. Takes charge in crisis.' },
+    judge: { name: 'The Judge', description: 'Driven by standards, logic, and fairness.' },
+    teacher: { name: 'The Teacher', description: 'Driven by growth and developing potential.' },
+    servant: { name: 'The Servant', description: 'Driven by harmony and supporting others.' },
+  };
+
+  const calculateArchetypeBreakdown = (): { primary: string; breakdown: ArchetypeBreakdown[] } => {
     const scores = { hero: 0, judge: 0, teacher: 0, servant: 0 };
     
     archetypeQuestions.forEach((q, index) => {
-      const answer = archetypeAnswers[index] || 2; // Default to neutral
+      const answer = archetypeAnswers[index] ?? 2; // Default to neutral
       scores[q.archetype as keyof typeof scores] += answer;
     });
 
-    const maxScore = Math.max(...Object.values(scores));
-    const archetype = Object.entries(scores).find(([_, score]) => score === maxScore)?.[0] || 'hero';
+    const totalScore = Object.values(scores).reduce((sum, s) => sum + s, 0);
     
-    const archetypeNames = {
-      hero: 'The Hero',
-      judge: 'The Judge',
-      teacher: 'The Teacher',
-      servant: 'The Servant',
-    };
-    
-    return archetypeNames[archetype as keyof typeof archetypeNames];
+    const breakdown: ArchetypeBreakdown[] = Object.entries(scores)
+      .map(([key, score]) => ({
+        name: archetypeInfo[key as keyof typeof archetypeInfo].name,
+        percentage: totalScore > 0 ? Math.round((score / totalScore) * 100) : 25,
+        description: archetypeInfo[key as keyof typeof archetypeInfo].description,
+      }))
+      .sort((a, b) => b.percentage - a.percentage);
+
+    return { primary: breakdown[0].name, breakdown };
   };
+
+  const [archetypeBreakdown, setArchetypeBreakdown] = useState<ArchetypeBreakdown[]>([]);
+  const [primaryArchetype, setPrimaryArchetype] = useState('');
 
   const handleArchetypeAnswer = (value: number) => {
     setArchetypeAnswers({ ...archetypeAnswers, [currentQuestion]: value });
@@ -309,10 +326,17 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
       setTimeout(() => setCurrentQuestion(currentQuestion + 1), 300);
     } else {
       setTimeout(() => {
-        setPhase('compass');
-        setCurrentQuestion(0);
+        const { primary, breakdown } = calculateArchetypeBreakdown();
+        setPrimaryArchetype(primary);
+        setArchetypeBreakdown(breakdown);
+        setPhase('results');
       }, 300);
     }
+  };
+
+  const handleResultsContinue = () => {
+    setPhase('compass');
+    setCurrentQuestion(0);
   };
 
   const handleCompassAnswer = (values: string[]) => {
@@ -347,7 +371,8 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
       setCurrentQuestion(currentQuestion + 1);
     } else {
       const results: AssessmentResults = {
-        archetype: calculateArchetype(),
+        archetype: primaryArchetype,
+        archetypeBreakdown,
         values: selectedValues,
         iceberg: icebergAnswers,
       };
@@ -363,6 +388,7 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-muted-foreground">
               {phase === 'archetype' && 'Phase 1: Leadership Style'}
+              {phase === 'results' && 'Your Archetype Results'}
               {phase === 'compass' && 'Phase 2: The Compass'}
               {phase === 'values' && 'Phase 3: Your Core Values'}
               {phase === 'iceberg' && 'Phase 4: The Iceberg'}
@@ -433,6 +459,87 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                     />
                   ))}
                 </div>
+              </motion.div>
+            )}
+
+            {/* Archetype Results Phase */}
+            {phase === 'results' && (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-8"
+              >
+                <div className="text-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                    className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mb-4"
+                  >
+                    <Sparkles className="w-8 h-8 text-primary" />
+                  </motion.div>
+                  <h2 className="text-2xl md:text-3xl font-display text-foreground mb-2">
+                    Your Leadership Archetype
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Based on your responses, here's your leadership style breakdown
+                  </p>
+                </div>
+
+                <div className="glass-surface rounded-2xl p-6 space-y-6">
+                  {/* Primary Archetype */}
+                  <div className="text-center pb-4 border-b border-border/50">
+                    <span className="text-sm text-muted-foreground uppercase tracking-wider">Primary Archetype</span>
+                    <h3 className="text-3xl font-display text-primary mt-1">{primaryArchetype}</h3>
+                  </div>
+
+                  {/* All Archetypes Breakdown */}
+                  <div className="space-y-4">
+                    {archetypeBreakdown.map((archetype, index) => (
+                      <motion.div
+                        key={archetype.name}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
+                        className="space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className={`font-medium ${index === 0 ? 'text-primary' : 'text-foreground'}`}>
+                              {archetype.name}
+                            </span>
+                            <p className="text-xs text-muted-foreground">{archetype.description}</p>
+                          </div>
+                          <span className={`text-lg font-bold ${index === 0 ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {archetype.percentage}%
+                          </span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${archetype.percentage}%` }}
+                            transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
+                            className={`h-full rounded-full ${
+                              index === 0 ? 'bg-primary glow-emerald' : 'bg-muted-foreground/50'
+                            }`}
+                          />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleResultsContinue}
+                  size="lg"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground glow-emerald"
+                >
+                  Continue to Value Discovery
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
               </motion.div>
             )}
 
