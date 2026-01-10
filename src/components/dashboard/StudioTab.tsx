@@ -46,97 +46,298 @@ const audioCategories: AudioCategory[] = [
   },
 ];
 
-// Sleep frequency options
+// Sleep frequency options with real content
 const sleepContent = [
   {
     id: 'sleep-delta',
-    title: 'Delta Waves',
+    title: 'Delta Deep Rest',
     frequency: '0.5-4Hz',
     duration: '60:00',
-    description: 'Deep sleep frequencies for maximum restoration and physical recovery.',
+    description: 'Delta wave frequencies guide your brain into the deepest stages of restorative sleep. This is where physical healing, immune function, and cellular regeneration occur. Best used when you need maximum recovery.',
     locked: false,
   },
   {
     id: 'sleep-theta',
-    title: 'Theta Relaxation',
+    title: 'Theta Twilight',
     frequency: '4-8Hz',
     duration: '45:00',
-    description: 'Light sleep and deep relaxation frequencies for drifting off peacefully.',
+    description: 'Theta frequencies accompany the hypnagogic state—the liminal space between waking and sleeping. This track helps quiet the analytical mind and drift into peaceful rest. Ideal for racing thoughts.',
     locked: false,
   },
   {
     id: 'sleep-schumann',
-    title: 'Schumann Resonance',
+    title: 'Earth Resonance',
     frequency: '7.83Hz',
     duration: '60:00',
-    description: 'Earth\'s natural frequency for grounding and harmonizing your sleep cycle.',
+    description: 'The Schumann Resonance is Earth\'s natural electromagnetic frequency. Entraining your brainwaves to this frequency promotes grounding, circadian regulation, and deep harmony with natural rhythms.',
     locked: false,
   },
   {
     id: 'sleep-432',
-    title: 'Harmonic Sleep',
+    title: 'Harmonic Restoration',
     frequency: '432Hz',
     duration: '45:00',
-    description: 'Natural tuning frequency for calming the mind and reducing anxiety before sleep.',
+    description: 'Known as the "natural tuning," 432Hz is said to be mathematically consistent with the patterns of the universe. This frequency calms the nervous system and reduces anxiety before sleep.',
     locked: true,
   },
   {
     id: 'sleep-528',
-    title: 'Healing Sleep',
+    title: 'DNA Repair Sleep',
     frequency: '528Hz',
     duration: '60:00',
-    description: 'The "love frequency" associated with DNA repair and deep cellular healing during rest.',
+    description: 'The "love frequency" or "miracle tone" is associated with DNA repair and cellular healing. Used by leaders who need to maximize recovery during limited sleep windows.',
+    locked: true,
+  },
+  {
+    id: 'sleep-rain',
+    title: 'Neural Rain',
+    frequency: 'Pink Noise',
+    duration: '120:00',
+    description: 'Filtered pink noise mimics the spectral pattern of natural rain. It masks disruptive sounds while providing consistent audio texture that promotes and maintains deep sleep throughout the night.',
     locked: true,
   },
 ];
 
-// Pre-made meditation content
+// Pre-made meditation content with real H2H scripts
 const meditationContent = [
   {
     id: 'med-morning',
-    title: 'Morning Clarity',
+    title: 'The Morning Architect',
     duration: '12:00',
-    description: 'Start your day with intention and focused awareness.',
+    description: 'Start your day by consciously designing your internal state. This guided practice combines breathwork, intention-setting, and visualization to architect your mindset before the world demands your attention.',
     locked: false,
+    script: `Welcome to The Morning Architect.
+
+Before the emails. Before the meetings. Before the demands of the world reach you—you have this moment to architect your internal state.
+
+Take a deep breath in through your nose... hold it at the top... and release slowly through your mouth.
+
+You are not just waking up today. You are building yourself.
+
+Let your awareness settle into your body. Feel the weight of your limbs. The rhythm of your heart. You are here. You are present. You are alive.
+
+Now, ask yourself: Who do I need to be today? Not what do I need to do—but who must I become to meet this day with power?
+
+See that version of yourself clearly. How do they hold themselves? How do they speak? How do they respond to challenge?
+
+This is your North Star for today. Not a to-do list, but an identity to embody.
+
+Take three more deep breaths, anchoring this vision into your nervous system...
+
+You are ready. Not because the day will be easy—but because you have chosen who you will be when it gets hard.
+
+Open your eyes when you're ready. Go architect your day.`,
   },
   {
     id: 'med-breath',
-    title: 'Breath of Calm',
-    duration: '7:30',
-    description: 'Quick reset meditation for high-pressure moments.',
+    title: 'The 3-Breath Reset',
+    duration: '3:00',
+    description: 'A rapid pattern interrupt for high-pressure moments. When your nervous system is hijacked by stress, these three intentional breaths return you to center. Used before crucial decisions or after triggering events.',
     locked: false,
+    script: `The 3-Breath Reset.
+
+Stop everything. Right now, you get three breaths to change your state.
+
+Breath One—The Pause.
+Inhale deeply through your nose for 4 counts... Hold for 4... Exhale for 6.
+This breath stops the momentum of reaction.
+
+Breath Two—The Release.
+Inhale again, and this time, imagine breathing out everything that's not serving you... The tension. The story. The urgency that's lying to you.
+Let it go on the exhale.
+
+Breath Three—The Return.
+One final breath. As you inhale, feel yourself returning to center. To presence. To choice.
+You exhale, and you are here.
+
+Whatever was running you five seconds ago no longer has control.
+
+You're ready. Move forward with intention.`,
   },
   {
     id: 'med-body',
-    title: 'Body Scan for Leaders',
+    title: 'The Leader\'s Body Scan',
     duration: '15:00',
-    description: 'Release tension and reconnect with physical awareness.',
+    description: 'Your body holds the wisdom your mind ignores. This practice guides you through a complete body scan, releasing stored tension and reconnecting with somatic intelligence. Essential for leaders who live in their heads.',
     locked: true,
+    script: `The Leader's Body Scan.
+
+Most leaders live from the neck up. They've outsourced their body to caffeine and willpower. But your body is speaking—and today, you're going to listen.
+
+Lie down or sit comfortably. Close your eyes.
+
+We'll move through each area of your body, not trying to change anything, just noticing what's there.
+
+Starting with the crown of your head...
+What sensation lives here? Pressure? Tightness? Nothing at all?
+Just notice.
+
+Moving down to your forehead... your eyes... your jaw.
+The jaw holds the words we didn't say. What's living there?
+
+Your neck and shoulders—where responsibility often calcifies into tension...
+Breathe into whatever you find.
+
+Down through your arms... your hands... fingertips.
+Leaders act with their hands. What energy lives there?
+
+Your chest—the seat of emotion.
+What's present in your heart right now?
+
+Your belly—where gut instinct lives.
+What does your gut know that your mind hasn't admitted?
+
+Your lower back... hips... legs... feet.
+
+Your body has been carrying your leadership. Thank it. And let it rest.`,
+  },
+  {
+    id: 'med-evening',
+    title: 'The Day Completion',
+    duration: '10:00',
+    description: 'Close the loops of your day before sleep. This practice helps you process experiences, release what no longer serves, and consciously close the chapter so tomorrow starts fresh.',
+    locked: true,
+    script: `The Day Completion.
+
+The day is done. Before you carry it into sleep, let's close it properly.
+
+Take a breath and let your body settle.
+
+First, recall three moments of genuine effort today. Not necessarily success—but moments you showed up fully. Let yourself feel satisfaction for those.
+
+Now, is there anything you're still holding? A conversation that went sideways. A decision you're second-guessing. A tension that followed you home.
+
+See it clearly. Name it internally.
+
+And now, consciously, set it down. Not because it's resolved—but because holding it overnight won't help you. Tomorrow's version of you can pick it up if needed.
+
+Finally, plant a seed for tomorrow. What quality do you want to embody when you wake? Patience. Courage. Clarity. Choose one.
+
+The day is complete. You did your best with what you had. That's always enough.
+
+Sleep well, leader. Tomorrow needs the rested version of you.`,
   },
 ];
 
-// Pre-made performance content
+// Pre-made performance content with real H2H primers
 const performanceContent = [
   {
     id: 'perf-board',
-    title: 'Before the Board Meeting',
+    title: 'Before the Board',
     duration: '4:32',
-    description: 'Neuro-prime your state for high-stakes boardroom presence.',
+    description: 'Prime your nervous system for high-stakes boardroom presence. This primer combines grounding, power posing, and strategic mindset preparation. You\'ll walk in regulated and ready.',
     locked: false,
+    script: `Before the Board.
+
+In a few minutes, you'll walk into a room where eyes will be on you. Where your words will be measured. Where your presence matters as much as your content.
+
+Let's prepare you properly.
+
+First, your body. Stand or sit tall. Shoulders back. Jaw relaxed. You are not going in to prove yourself—you belong in that room.
+
+Take a deep breath. On the exhale, release any need for approval.
+
+Remember: You are not performing. You are serving. Every word you speak is in service of the mission, not your ego.
+
+Now, see the room in your mind. See the faces. And imagine them not as judges—but as allies you haven't convinced yet.
+
+Your job is simple: Be clear. Be calm. Be compelling.
+
+Whatever happens in there, your worth is not on the table. Only your ideas.
+
+One final breath. Ground yourself in your feet. You're ready.
+
+Walk in like you've been there a thousand times. Because in a way, you have.`,
   },
   {
     id: 'perf-convo',
-    title: 'Difficult Conversations',
+    title: 'The Hard Conversation',
     duration: '5:22',
-    description: 'Mental preparation for the hardest conversations.',
+    description: 'Mental preparation before difficult conversations—performance reviews, terminations, boundary-setting, or crucial feedback. Ground yourself in compassion and clarity.',
     locked: false,
+    script: `The Hard Conversation.
+
+You're about to have a conversation you've been dreading. That discomfort? It means you care about doing this right. Let's use that energy.
+
+First, ground yourself. Feel your feet on the floor. You are solid. You are present.
+
+Remind yourself why this conversation matters. It's not about being liked—it's about being truthful. And sometimes truth is the greatest gift we can give someone.
+
+Take a breath and recall your intention. What do you want this person to understand? Not just hear—but truly get?
+
+Now, prepare for their reaction. They might be defensive. They might be hurt. They might surprise you. Whatever happens, you can hold space for it.
+
+Your job is not to control their response. Your job is to speak your truth with respect and listen to theirs.
+
+One more thing: You don't have to be perfect. You just have to be honest and kind in equal measure.
+
+Take a final breath. You've prepared. You're ready.
+
+This is what leadership looks like. Not the easy conversations—but the necessary ones.
+
+Go.`,
   },
   {
     id: 'perf-negotiate',
-    title: 'Negotiation Mindset',
+    title: 'Negotiation State',
     duration: '6:45',
-    description: 'Center yourself before crucial discussions.',
+    description: 'Enter any negotiation centered and strategic. This primer activates calm confidence, detachment from outcome, and the ability to hold multiple perspectives simultaneously.',
     locked: true,
+    script: `Negotiation State.
+
+Every negotiation is a dance between positions. And the person who is most grounded, most present, most able to detach from needing a specific outcome—has the advantage.
+
+Let's get you there.
+
+Close your eyes. Take three slow breaths, each one deeper than the last.
+
+Now, remember: This negotiation is not about winning. It's about creating value. The goal is not to beat them—it's to find the solution that serves both parties.
+
+Imagine the best possible outcome. See it clearly. Feel what it would be like to walk away with that result.
+
+Now, let it go. Release your attachment to that specific outcome.
+
+Why? Because attachment makes you rigid. And rigidity loses negotiations.
+
+Instead, anchor yourself in your BATNA—your best alternative. You know what you'll do if this doesn't work out. That knowledge gives you power.
+
+When you walk in, be curious. Ask more questions than you answer. Seek to understand their world before demanding they understand yours.
+
+And remember: Silence is a tool. You don't have to fill every pause.
+
+Take one more breath. You're calm. You're prepared. You're ready to dance.
+
+Let's go.`,
+  },
+  {
+    id: 'perf-present',
+    title: 'The Big Presentation',
+    duration: '5:00',
+    description: 'Transform presentation anxiety into performance energy. This primer helps you channel nervous activation into compelling delivery. Perfect before keynotes, pitches, or all-hands.',
+    locked: true,
+    script: `The Big Presentation.
+
+Those butterflies in your stomach? They're not weakness. They're power waiting to be channeled.
+
+Your nervous system knows something important is about to happen. Good. That means you care. Let's convert that energy into presence.
+
+Stand up if you can. Shake out your hands. Roll your shoulders back. Your body language speaks before your words do.
+
+Now, take a breath deep into your belly. Hold for a moment. And release slowly.
+
+Remember this: You are not the content. You are the vessel. Your job is to serve your audience, not to impress them.
+
+Think about one person in that audience who needs what you're about to share. Maybe they're struggling with exactly what you'll address. Speak to them.
+
+When you walk on that stage or into that room, make eye contact. Pause before you begin. Let them see that you're present.
+
+You don't need to be perfect. You need to be real.
+
+And if you lose your place? Pause. Breathe. The audience will wait. In fact, they'll respect you more for being human.
+
+One final breath. You've prepared. You know your material. Now trust yourself to deliver it.
+
+It's showtime.`,
   },
 ];
 
