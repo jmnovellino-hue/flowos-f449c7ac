@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import logoDark from "@/assets/h2h-logo-dark.png";
 import ProductSpecsDocument from "@/components/beta/ProductSpecsDocument";
+import { trackBetaEvent } from "@/lib/betaAnalytics";
 
 const features = [
   {
@@ -83,7 +84,9 @@ const BetaLaunch = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    // Track that user accessed the launch page
+    // Track page view and that user accessed the launch page
+    trackBetaEvent('launch_page_viewed');
+    
     const trackAccess = async () => {
       const storedEmail = localStorage.getItem('beta_email');
       if (storedEmail) {
@@ -97,7 +100,14 @@ const BetaLaunch = () => {
     trackAccess();
   }, []);
 
+  const handleViewSpecs = () => {
+    trackBetaEvent('specs_viewed');
+    setShowSpecs(true);
+  };
+
   const handleAccessApp = async () => {
+    trackBetaEvent('app_accessed', { email: userEmail || undefined });
+    
     if (userEmail) {
       await supabase
         .from('beta_applications')
@@ -123,7 +133,7 @@ const BetaLaunch = () => {
           <div className="flex items-center justify-between">
             <img src={logoDark} alt="H2H Inner Lab" className="h-12 object-contain" />
             <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => setShowSpecs(true)}>
+              <Button variant="ghost" onClick={handleViewSpecs}>
                 <Download className="w-4 h-4 mr-2" />
                 Product Specs
               </Button>

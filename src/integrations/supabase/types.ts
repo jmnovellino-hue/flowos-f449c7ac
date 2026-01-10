@@ -178,6 +178,33 @@ export type Database = {
         }
         Relationships: []
       }
+      beta_analytics: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          session_id: string | null
+          user_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          session_id?: string | null
+          user_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          session_id?: string | null
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       beta_applications: {
         Row: {
           accessed_app: boolean
