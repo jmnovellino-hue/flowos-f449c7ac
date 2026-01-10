@@ -15,3 +15,7 @@ verify_jwt = false
 [functions.elevenlabs-scribe-token]
 enabled = true
 verify_jwt = false
+
+[functions.weekly-wisdom-digest]
+enabled = true
+verify_jwt = false

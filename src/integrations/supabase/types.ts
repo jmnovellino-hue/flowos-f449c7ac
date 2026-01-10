@@ -263,34 +263,43 @@ export type Database = {
           archetype: string | null
           created_at: string
           display_name: string | null
+          email: string | null
           id: string
+          last_digest_sent_at: string | null
           streak: number | null
           tier: string | null
           updated_at: string
           user_id: string
           values: string[] | null
+          weekly_digest_enabled: boolean | null
         }
         Insert: {
           archetype?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
+          last_digest_sent_at?: string | null
           streak?: number | null
           tier?: string | null
           updated_at?: string
           user_id: string
           values?: string[] | null
+          weekly_digest_enabled?: boolean | null
         }
         Update: {
           archetype?: string | null
           created_at?: string
           display_name?: string | null
+          email?: string | null
           id?: string
+          last_digest_sent_at?: string | null
           streak?: number | null
           tier?: string | null
           updated_at?: string
           user_id?: string
           values?: string[] | null
+          weekly_digest_enabled?: boolean | null
         }
         Relationships: []
       }

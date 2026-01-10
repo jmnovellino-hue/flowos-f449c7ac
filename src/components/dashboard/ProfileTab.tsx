@@ -1,7 +1,13 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut, ExternalLink } from 'lucide-react';
+import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut, ExternalLink, Mail, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import h2hLogo from '../../assets/h2h-logo-light.png';
 
 interface ProfileTabProps {
@@ -12,11 +18,80 @@ interface ProfileTabProps {
     tier: string;
     streak: number;
   };
+  userId?: string;
   onNavigateToArchetype?: () => void;
   onNavigateToShadow?: () => void;
 }
 
-export const ProfileTab = ({ userProfile, onNavigateToArchetype, onNavigateToShadow }: ProfileTabProps) => {
+export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavigateToShadow }: ProfileTabProps) => {
+  const [email, setEmail] = useState('');
+  const [weeklyDigestEnabled, setWeeklyDigestEnabled] = useState(true);
+  const [isSavingEmail, setIsSavingEmail] = useState(false);
+  const [isSendingDigest, setIsSendingDigest] = useState(false);
+
+  useEffect(() => {
+    if (userId) {
+      loadEmailSettings();
+    }
+  }, [userId]);
+
+  const loadEmailSettings = async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('email, weekly_digest_enabled')
+      .eq('user_id', userId)
+      .single();
+    
+    if (data) {
+      setEmail(data.email || '');
+      setWeeklyDigestEnabled(data.weekly_digest_enabled ?? true);
+    }
+  };
+
+  const saveEmailSettings = async () => {
+    if (!userId) return;
+    setIsSavingEmail(true);
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        email, 
+        weekly_digest_enabled: weeklyDigestEnabled 
+      })
+      .eq('user_id', userId);
+    
+    setIsSavingEmail(false);
+    
+    if (error) {
+      toast.error('Failed to save email settings');
+    } else {
+      toast.success('Email settings saved');
+    }
+  };
+
+  const sendTestDigest = async () => {
+    if (!userId || !email) {
+      toast.error('Please save your email first');
+      return;
+    }
+    
+    setIsSendingDigest(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('weekly-wisdom-digest', {
+        body: { userId }
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Digest sent! Check your email.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send digest');
+    } finally {
+      setIsSendingDigest(false);
+    }
+  };
+
   const shadowTraits = [
     { name: 'Martyr Syndrome', level: 72, description: 'Tendency to overwork and sacrifice personal needs' },
     { name: 'Control Compulsion', level: 58, description: 'Difficulty delegating and trusting others' },
@@ -263,11 +338,68 @@ export const ProfileTab = ({ userProfile, onNavigateToArchetype, onNavigateToSha
             </a>
           </motion.div>
 
-          {/* Actions */}
+          {/* Weekly Digest Settings */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
+            className="glass-surface rounded-2xl p-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Mail className="w-5 h-5 text-primary" />
+              <span className="font-medium text-foreground">Weekly Wisdom Digest</span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Receive a weekly email summarizing your saved insights, conversations, and commitment progress.
+            </p>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="digest-email" className="text-sm text-muted-foreground">Email Address</Label>
+                <Input
+                  id="digest-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1"
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="digest-toggle" className="text-sm">Enable Weekly Digest</Label>
+                <Switch
+                  id="digest-toggle"
+                  checked={weeklyDigestEnabled}
+                  onCheckedChange={setWeeklyDigestEnabled}
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={saveEmailSettings} 
+                  disabled={isSavingEmail}
+                  className="flex-1"
+                >
+                  {isSavingEmail ? 'Saving...' : 'Save Settings'}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={sendTestDigest}
+                  disabled={isSendingDigest || !email}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  {isSendingDigest ? 'Sending...' : 'Send Now'}
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
             className="space-y-2"
           >
             <Button variant="outline" className="w-full justify-start">
