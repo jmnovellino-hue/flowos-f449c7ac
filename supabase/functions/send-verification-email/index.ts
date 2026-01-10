@@ -72,7 +72,7 @@ serve(async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "FlowOS <noreply@resend.dev>",
+        from: "FlowOS <hello@theh2hexperiment.com>",
         to: [email],
         subject: "Verify your email for Weekly Wisdom Digest",
         html: `

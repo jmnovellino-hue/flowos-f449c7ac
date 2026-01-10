@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ContactSection } from './ContactSection';
 import h2hLogo from '../../assets/h2h-logo-light.png';
 
 interface ProfileTabProps {
@@ -466,11 +467,20 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
             </div>
           </motion.div>
 
-          {/* Actions */}
+          {/* Contact Us */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45 }}
+          >
+            <ContactSection />
+          </motion.div>
+
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
             className="space-y-2"
           >
             <Button variant="outline" className="w-full justify-start">
