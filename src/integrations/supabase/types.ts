@@ -258,12 +258,51 @@ export type Database = {
         }
         Relationships: []
       }
+      journal_entries: {
+        Row: {
+          concerns: string | null
+          created_at: string
+          energy: number
+          entry_date: string
+          id: string
+          mood: number
+          thoughts: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          concerns?: string | null
+          created_at?: string
+          energy: number
+          entry_date?: string
+          id?: string
+          mood: number
+          thoughts?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          concerns?: string | null
+          created_at?: string
+          energy?: number
+          entry_date?: string
+          id?: string
+          mood?: number
+          thoughts?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           archetype: string | null
           created_at: string
           display_name: string | null
           email: string | null
+          email_verification_sent_at: string | null
+          email_verification_token: string | null
+          email_verified: boolean | null
           id: string
           last_digest_sent_at: string | null
           streak: number | null
@@ -278,6 +317,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          email_verification_sent_at?: string | null
+          email_verification_token?: string | null
+          email_verified?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
           streak?: number | null
@@ -292,6 +334,9 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          email_verification_sent_at?: string | null
+          email_verification_token?: string | null
+          email_verified?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
           streak?: number | null

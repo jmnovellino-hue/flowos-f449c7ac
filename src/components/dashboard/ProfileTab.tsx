@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut, ExternalLink, Mail, Send } from 'lucide-react';
+import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut, ExternalLink, Mail, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,8 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
   const [weeklyDigestEnabled, setWeeklyDigestEnabled] = useState(true);
   const [isSavingEmail, setIsSavingEmail] = useState(false);
   const [isSendingDigest, setIsSendingDigest] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [isSendingVerification, setIsSendingVerification] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -38,13 +40,14 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
   const loadEmailSettings = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('email, weekly_digest_enabled')
+      .select('email, weekly_digest_enabled, email_verified')
       .eq('user_id', userId)
       .single();
     
     if (data) {
       setEmail(data.email || '');
       setWeeklyDigestEnabled(data.weekly_digest_enabled ?? true);
+      setEmailVerified(data.email_verified ?? false);
     }
   };
 
@@ -66,6 +69,34 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
       toast.error('Failed to save email settings');
     } else {
       toast.success('Email settings saved');
+      // Reset verification status if email changed
+      setEmailVerified(false);
+    }
+  };
+
+  const sendVerificationEmail = async () => {
+    if (!userId || !email) {
+      toast.error('Please enter and save your email first');
+      return;
+    }
+    
+    setIsSendingVerification(true);
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const { error } = await supabase.functions.invoke('send-verification-email', {
+        body: { email }
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Verification email sent! Check your inbox.');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send verification email');
+    } finally {
+      setIsSendingVerification(false);
     }
   };
 
@@ -356,14 +387,49 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
             <div className="space-y-4">
               <div>
                 <Label htmlFor="digest-email" className="text-sm text-muted-foreground">Email Address</Label>
-                <Input
-                  id="digest-email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1"
-                />
+                <div className="relative mt-1">
+                  <Input
+                    id="digest-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pr-10"
+                  />
+                  {emailVerified && (
+                    <CheckCircle className="w-5 h-5 text-primary absolute right-3 top-1/2 -translate-y-1/2" />
+                  )}
+                </div>
+                
+                {email && !emailVerified && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-500" />
+                    <span className="text-xs text-amber-500">Email not verified</span>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 text-xs text-primary"
+                      onClick={sendVerificationEmail}
+                      disabled={isSendingVerification}
+                    >
+                      {isSendingVerification ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        'Send verification'
+                      )}
+                    </Button>
+                  </div>
+                )}
+                
+                {emailVerified && (
+                  <p className="text-xs text-primary mt-1 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    Email verified - you'll receive weekly digests
+                  </p>
+                )}
               </div>
               
               <div className="flex items-center justify-between">
@@ -374,6 +440,10 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
                   onCheckedChange={setWeeklyDigestEnabled}
                 />
               </div>
+              
+              <p className="text-xs text-muted-foreground">
+                Digests are sent automatically every Sunday at 9am UTC.
+              </p>
               
               <div className="flex gap-2">
                 <Button 
@@ -386,7 +456,8 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
                 <Button 
                   variant="outline" 
                   onClick={sendTestDigest}
-                  disabled={isSendingDigest || !email}
+                  disabled={isSendingDigest || !email || !emailVerified}
+                  title={!emailVerified ? 'Please verify your email first' : ''}
                 >
                   <Send className="w-4 h-4 mr-2" />
                   {isSendingDigest ? 'Sending...' : 'Send Now'}

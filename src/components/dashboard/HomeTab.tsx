@@ -17,6 +17,7 @@ interface HomeTabProps {
       belief: string;
     };
   };
+  userId?: string;
   onNavigateToProfile?: () => void;
 }
 
@@ -26,7 +27,7 @@ const dailyWisdom = {
   category: "The H2H Experiment"
 };
 
-export const HomeTab = ({ userProfile, onNavigateToProfile }: HomeTabProps) => {
+export const HomeTab = ({ userProfile, userId, onNavigateToProfile }: HomeTabProps) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return { text: 'Good Morning', subtitle: 'Focus.' };
@@ -85,7 +86,7 @@ export const HomeTab = ({ userProfile, onNavigateToProfile }: HomeTabProps) => {
           <MicroExperimentsSection />
 
           {/* Daily Journal */}
-          <JournalingSection />
+          <JournalingSection userId={userId} />
         </div>
 
         {/* Side Column */}
