@@ -8,10 +8,10 @@ import {
   MessageCircle, 
   User,
   Menu,
-  X,
-  Sparkles
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import h2hLogo from '@/assets/h2h-logo-light.png';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -35,15 +35,18 @@ export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardL
     <div className="min-h-screen bg-background neural-grid">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 lg:w-64 flex-col bg-sidebar border-r border-sidebar-border z-50">
-        {/* Logo */}
+        {/* H2H Logo */}
         <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-emerald">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
+            <img src={h2hLogo} alt="H2H" className="h-8 w-auto" />
+            <div className="hidden lg:flex flex-col">
+              <span className="text-sm font-display font-semibold text-sidebar-foreground leading-tight">
+                Inner Lab
+              </span>
+              <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                FlowOS
+              </span>
             </div>
-            <span className="hidden lg:block text-lg font-display font-semibold text-sidebar-foreground">
-              FlowOS
-            </span>
           </div>
         </div>
 
@@ -75,11 +78,11 @@ export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardL
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               <span className="text-xs font-medium text-primary uppercase tracking-wider">
-                Architect Tier
+                H2H Member
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Full access enabled
+              Inner Lab Access
             </p>
           </div>
         </div>
@@ -88,10 +91,10 @@ export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardL
       {/* Mobile Header */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-b border-border z-50 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-primary-foreground" />
+          <img src={h2hLogo} alt="H2H" className="h-6 w-auto" />
+          <div className="flex flex-col">
+            <span className="text-sm font-display font-semibold leading-tight">Inner Lab</span>
           </div>
-          <span className="text-lg font-display font-semibold">FlowOS</span>
         </div>
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

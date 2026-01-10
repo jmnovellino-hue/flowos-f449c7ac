@@ -324,7 +324,7 @@ export const LabTab = () => {
                   Top <span className="text-secondary">{100 - mockUserStats.percentile}%</span> of leaders
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  You're outperforming {mockUserStats.percentile}% of FlowOS users
+                  You're outperforming {mockUserStats.percentile}% of H2H Inner Lab members
                 </p>
               </div>
 
@@ -352,7 +352,7 @@ export const LabTab = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Consistent tracking builds awareness and drives improvement. Log your metrics every day to maintain your streak.
             </p>
-            <Button className="w-full bg-primary hover:bg-primary/90 glow-emerald">
+            <Button className="w-full bg-primary hover:bg-primary/90 glow-turquoise">
               Save Today's Log
             </Button>
           </motion.div>

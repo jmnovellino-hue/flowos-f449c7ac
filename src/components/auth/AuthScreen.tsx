@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Sparkles, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NeuralBackground } from '@/components/ui/NeuralBackground';
 import { useAuth } from '@/hooks/useAuth';
-
+import h2hLogo from '@/assets/h2h-logo-light.png';
 interface AuthScreenProps {
   onComplete: () => void;
 }
@@ -67,25 +67,29 @@ export const AuthScreen = ({ onComplete }: AuthScreenProps) => {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-10 w-full max-w-md px-6"
       >
-        {/* Logo & Tagline */}
+        {/* H2H Inner Lab Branding */}
         <motion.div 
           className="text-center mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-emerald">
-              <Sparkles className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-display font-semibold text-foreground">FlowOS</span>
+          {/* H2H Logo */}
+          <div className="flex justify-center mb-4">
+            <img src={h2hLogo} alt="The H2H Experiment" className="h-12 w-auto" />
           </div>
+          
+          {/* Inner Lab Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <span className="text-xs font-medium text-primary uppercase tracking-wider">H2H Inner Lab</span>
+          </div>
+          
           <h1 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-3">
             Master your internal
             <span className="block text-gradient-primary">architecture.</span>
           </h1>
           <p className="text-muted-foreground text-lg">
-            Shape the next generation.
+            Shape the next generation of leadership.
           </p>
         </motion.div>
 
@@ -163,7 +167,7 @@ export const AuthScreen = ({ onComplete }: AuthScreenProps) => {
             <Button 
               type="submit" 
               disabled={loading}
-              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium glow-emerald transition-all duration-300 hover:glow-emerald-intense"
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium glow-turquoise transition-all duration-300 hover:glow-turquoise-intense"
             >
               {loading ? (
                 <>

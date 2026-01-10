@@ -186,7 +186,7 @@ export const StudioTab = () => {
           The Studio
         </h1>
         <p className="text-lg text-muted-foreground">
-          AI-powered audio for the liminal spaces of your day.
+          H2H AI-powered audio for the liminal spaces of your day.
         </p>
       </motion.div>
 
@@ -198,7 +198,7 @@ export const StudioTab = () => {
         className="glass-surface rounded-2xl p-6 mb-8"
       >
         <div className="flex items-center gap-6">
-          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 glow-emerald">
+          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 glow-turquoise">
             <Headphones className="w-8 h-8 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">

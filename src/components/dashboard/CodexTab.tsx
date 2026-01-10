@@ -75,7 +75,7 @@ export const CodexTab = () => {
           The Codex
         </h1>
         <p className="text-lg text-muted-foreground">
-          Battle-tested tools, not just theory.
+          Battle-tested tools from The H2H Experiment, not just theory.
         </p>
       </motion.div>
 
@@ -144,7 +144,7 @@ export const CodexTab = () => {
               The complete guide to Human-to-Human leadership methodology. 48 pages of actionable frameworks.
             </p>
           </div>
-          <Button className="bg-primary hover:bg-primary/90 glow-emerald flex-shrink-0">
+          <Button className="bg-primary hover:bg-primary/90 glow-turquoise flex-shrink-0">
             <Download className="w-4 h-4 mr-2" />
             Download
           </Button>

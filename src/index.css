@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    /* FlowOS - Synthetic Empathy Dark Theme */
+    /* H2H Inner Lab - Dark Theme with Turquoise Identity */
     --background: 220 20% 6%;
     --foreground: 210 20% 92%;
 
@@ -16,19 +16,19 @@
     --popover: 220 18% 8%;
     --popover-foreground: 210 20% 92%;
 
-    /* Bioluminescent Emerald */
-    --primary: 160 84% 45%;
+    /* H2H Turquoise/Cyan Primary */
+    --primary: 174 65% 52%;
     --primary-foreground: 220 20% 6%;
 
-    /* Warm Amber */
+    /* Warm Amber Secondary */
     --secondary: 38 92% 55%;
     --secondary-foreground: 220 20% 6%;
 
     --muted: 220 15% 15%;
     --muted-foreground: 215 15% 55%;
 
-    /* Emerald Glow Accent */
-    --accent: 160 70% 35%;
+    /* Turquoise Accent */
+    --accent: 174 55% 42%;
     --accent-foreground: 210 20% 95%;
 
     --destructive: 0 72% 55%;
@@ -36,59 +36,59 @@
 
     --border: 220 15% 18%;
     --input: 220 15% 15%;
-    --ring: 160 84% 45%;
+    --ring: 174 65% 52%;
 
     --radius: 0.75rem;
 
-    /* Custom FlowOS tokens */
-    --glow-emerald: 160 84% 45%;
+    /* Custom H2H tokens */
+    --glow-turquoise: 174 65% 52%;
     --glow-amber: 38 92% 55%;
     --surface-elevated: 220 18% 12%;
     --surface-glass: 220 20% 8%;
     
     /* Gradients */
     --gradient-neural: linear-gradient(135deg, hsl(220 20% 6%) 0%, hsl(220 18% 12%) 50%, hsl(220 20% 8%) 100%);
-    --gradient-emerald-glow: linear-gradient(135deg, hsl(160 84% 45% / 0.15) 0%, hsl(160 70% 35% / 0.05) 100%);
+    --gradient-turquoise-glow: linear-gradient(135deg, hsl(174 65% 52% / 0.15) 0%, hsl(174 55% 42% / 0.05) 100%);
     --gradient-amber-glow: linear-gradient(135deg, hsl(38 92% 55% / 0.15) 0%, hsl(38 80% 45% / 0.05) 100%);
     --gradient-hero: linear-gradient(180deg, hsl(220 20% 6%) 0%, hsl(220 18% 10%) 100%);
     
     /* Shadows */
-    --shadow-glow-sm: 0 0 20px hsl(160 84% 45% / 0.15);
-    --shadow-glow-md: 0 0 40px hsl(160 84% 45% / 0.2);
-    --shadow-glow-lg: 0 0 60px hsl(160 84% 45% / 0.25);
+    --shadow-glow-sm: 0 0 20px hsl(174 65% 52% / 0.15);
+    --shadow-glow-md: 0 0 40px hsl(174 65% 52% / 0.2);
+    --shadow-glow-lg: 0 0 60px hsl(174 65% 52% / 0.25);
     --shadow-ambient: 0 8px 32px hsl(220 20% 2% / 0.5);
 
     --sidebar-background: 220 18% 8%;
     --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 160 84% 45%;
+    --sidebar-primary: 174 65% 52%;
     --sidebar-primary-foreground: 220 20% 6%;
     --sidebar-accent: 220 15% 15%;
     --sidebar-accent-foreground: 210 20% 92%;
     --sidebar-border: 220 15% 18%;
-    --sidebar-ring: 160 84% 45%;
+    --sidebar-ring: 174 65% 52%;
   }
 
   .dark {
-    /* Same as root - FlowOS is dark-mode native */
+    /* Same as root - H2H Inner Lab is dark-mode native */
     --background: 220 20% 6%;
     --foreground: 210 20% 92%;
     --card: 220 18% 10%;
     --card-foreground: 210 20% 92%;
     --popover: 220 18% 8%;
     --popover-foreground: 210 20% 92%;
-    --primary: 160 84% 45%;
+    --primary: 174 65% 52%;
     --primary-foreground: 220 20% 6%;
     --secondary: 38 92% 55%;
     --secondary-foreground: 220 20% 6%;
     --muted: 220 15% 15%;
     --muted-foreground: 215 15% 55%;
-    --accent: 160 70% 35%;
+    --accent: 174 55% 42%;
     --accent-foreground: 210 20% 95%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 210 20% 98%;
     --border: 220 15% 18%;
     --input: 220 15% 15%;
-    --ring: 160 84% 45%;
+    --ring: 174 65% 52%;
   }
 }
 
@@ -116,6 +116,15 @@
     @apply bg-gradient-to-r from-secondary to-primary bg-clip-text text-transparent;
   }
 
+  .glow-turquoise {
+    box-shadow: var(--shadow-glow-md);
+  }
+
+  .glow-turquoise-intense {
+    box-shadow: var(--shadow-glow-lg);
+  }
+
+  /* Backwards compatibility aliases */
   .glow-emerald {
     box-shadow: var(--shadow-glow-md);
   }
@@ -136,6 +145,10 @@
     background-image: 
       radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.03) 0%, transparent 50%),
       radial-gradient(circle at 75% 75%, hsl(var(--secondary) / 0.02) 0%, transparent 50%);
+  }
+
+  .h2h-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(174 75% 40%) 100%);
   }
 }
 

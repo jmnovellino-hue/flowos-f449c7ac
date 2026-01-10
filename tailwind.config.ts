@@ -62,7 +62,8 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         glow: {
-          emerald: "hsl(var(--glow-emerald))",
+          turquoise: "hsl(var(--glow-turquoise))",
+          emerald: "hsl(var(--glow-turquoise))", // Alias for backwards compatibility
           amber: "hsl(var(--glow-amber))",
         },
         surface: {

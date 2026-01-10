@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Eye, Compass, Building2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import h2hLogo from '@/assets/h2h-logo-light.png';
 interface JourneyIntroProps {
   onBegin: () => void;
 }
@@ -47,11 +47,20 @@ export const JourneyIntro = ({ onBegin }: JourneyIntroProps) => {
           transition={{ delay: 0.2 }}
           className="text-center mb-12"
         >
+          {/* H2H Logo */}
+          <div className="flex justify-center mb-4">
+            <img src={h2hLogo} alt="The H2H Experiment" className="h-10 w-auto opacity-80" />
+          </div>
+          
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <span className="text-xs font-medium text-primary uppercase tracking-wider">H2H Inner Lab</span>
+          </div>
+          
           <h1 className="text-4xl md:text-5xl font-display font-semibold text-foreground mb-4">
             The Call to Adventure
           </h1>
           <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-            The value of FlowOS comes from honest self-assessment, not passive consumption. 
+            The value of the Inner Lab comes from honest self-assessment, not passive consumption. 
             Your transformation begins with truth.
           </p>
         </motion.div>
@@ -99,7 +108,7 @@ export const JourneyIntro = ({ onBegin }: JourneyIntroProps) => {
           <Button
             onClick={onBegin}
             size="lg"
-            className="h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-lg glow-emerald hover:glow-emerald-intense transition-all duration-300 group"
+            className="h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium text-lg glow-turquoise hover:glow-turquoise-intense transition-all duration-300 group"
           >
             Begin Assessment
             <motion.div

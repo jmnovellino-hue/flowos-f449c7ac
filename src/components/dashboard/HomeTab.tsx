@@ -22,9 +22,8 @@ interface HomeTabProps {
 const dailyWisdom = {
   quote: "Until you make the unconscious conscious, it will direct your life and you will call it fate.",
   author: "Carl Jung",
-  category: "Shadow Work"
+  category: "The H2H Experiment"
 };
-
 
 export const HomeTab = ({ userProfile }: HomeTabProps) => {
   const getGreeting = () => {

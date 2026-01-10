@@ -106,12 +106,12 @@ export const ArchitectTab = () => {
       {/* Header */}
       <div className="flex-shrink-0 p-6 border-b border-border/50">
         <div className="max-w-3xl mx-auto flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-emerald">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-turquoise">
             <Sparkles className="w-6 h-6 text-primary-foreground" />
           </div>
           <div>
             <h1 className="text-xl font-display font-semibold text-foreground">The Architect</h1>
-            <p className="text-sm text-muted-foreground">Your AI leadership mentor</p>
+            <p className="text-sm text-muted-foreground">H2H AI Leadership Mentor</p>
           </div>
         </div>
       </div>
@@ -204,7 +204,7 @@ export const ArchitectTab = () => {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground text-center mt-3">
-            The Architect is context-aware and remembers your journey
+            Powered by The H2H Experiment • Context-aware and remembers your journey
           </p>
         </div>
       </div>
