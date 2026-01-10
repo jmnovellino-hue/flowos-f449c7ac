@@ -17,6 +17,7 @@ interface HomeTabProps {
       belief: string;
     };
   };
+  onNavigateToProfile?: () => void;
 }
 
 const dailyWisdom = {
@@ -25,7 +26,7 @@ const dailyWisdom = {
   category: "The H2H Experiment"
 };
 
-export const HomeTab = ({ userProfile }: HomeTabProps) => {
+export const HomeTab = ({ userProfile, onNavigateToProfile }: HomeTabProps) => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return { text: 'Good Morning', subtitle: 'Focus.' };
@@ -44,7 +45,7 @@ export const HomeTab = ({ userProfile }: HomeTabProps) => {
         className="mb-10"
       >
         <h1 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-2">
-          {greeting.text}, <span className="text-gradient-primary">{userProfile.name}</span>
+          {greeting.text}, <span className="text-gradient-primary">{userProfile.name || 'Leader'}</span>
         </h1>
         <p className="text-lg text-muted-foreground">{greeting.subtitle}</p>
       </motion.div>
@@ -136,7 +137,12 @@ export const HomeTab = ({ userProfile }: HomeTabProps) => {
               <p className="text-sm text-muted-foreground mb-4">
                 Driven by ownership and results. Watch for Martyr Syndrome.
               </p>
-              <Button variant="outline" size="sm" className="w-full">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={onNavigateToProfile}
+              >
                 View Full Analysis
               </Button>
             </div>

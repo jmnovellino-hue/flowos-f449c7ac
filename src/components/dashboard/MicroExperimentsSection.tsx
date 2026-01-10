@@ -73,36 +73,56 @@ const feelingScale = [
 export const MicroExperimentsSection = () => {
   const [experiments, setExperiments] = useState(microExperiments);
   const [selectedExperiment, setSelectedExperiment] = useState<MicroExperiment | null>(null);
-  const [showTracker, setShowTracker] = useState(false);
-  const [log, setLog] = useState<ExperimentLog>({
-    what: '',
-    when: '',
-    why: '',
-    outcome: '',
-    feelingBefore: 3,
-    feelingAfter: 3,
-  });
+  const [trackingExperimentId, setTrackingExperimentId] = useState<number | null>(null);
+  const [logs, setLogs] = useState<Record<number, ExperimentLog>>({});
 
-  const activeExperiment = experiments.find(e => e.active);
+  const activeExperiments = experiments.filter(e => e.active);
 
   const handleActivate = (exp: MicroExperiment) => {
-    setExperiments(experiments.map(e => ({
-      ...e,
-      active: e.id === exp.id
-    })));
+    setExperiments(experiments.map(e => 
+      e.id === exp.id ? { ...e, active: true } : e
+    ));
+    // Initialize log for this experiment
+    setLogs(prev => ({
+      ...prev,
+      [exp.id]: { what: '', when: '', why: '', outcome: '', feelingBefore: 3, feelingAfter: 3 }
+    }));
     setSelectedExperiment(null);
   };
 
-  const handleComplete = () => {
-    if (activeExperiment) {
-      setExperiments(experiments.map(e => 
-        e.id === activeExperiment.id 
-          ? { ...e, completed: true, active: false }
-          : e
-      ));
-      setShowTracker(false);
-      setLog({ what: '', when: '', why: '', outcome: '', feelingBefore: 3, feelingAfter: 3 });
+  const handleDeactivate = (expId: number) => {
+    setExperiments(experiments.map(e => 
+      e.id === expId ? { ...e, active: false } : e
+    ));
+    if (trackingExperimentId === expId) {
+      setTrackingExperimentId(null);
     }
+  };
+
+  const handleComplete = (expId: number) => {
+    setExperiments(experiments.map(e => 
+      e.id === expId 
+        ? { ...e, completed: true, active: false }
+        : e
+    ));
+    setTrackingExperimentId(null);
+    // Clear the log for this experiment
+    setLogs(prev => {
+      const newLogs = { ...prev };
+      delete newLogs[expId];
+      return newLogs;
+    });
+  };
+
+  const updateLog = (expId: number, field: keyof ExperimentLog, value: string | number) => {
+    setLogs(prev => ({
+      ...prev,
+      [expId]: { ...prev[expId], [field]: value }
+    }));
+  };
+
+  const getLog = (expId: number): ExperimentLog => {
+    return logs[expId] || { what: '', when: '', why: '', outcome: '', feelingBefore: 3, feelingAfter: 3 };
   };
 
   return (
@@ -115,147 +135,172 @@ export const MicroExperimentsSection = () => {
       <div className="flex items-center gap-2 mb-6">
         <Zap className="w-5 h-5 text-primary" />
         <span className="font-medium text-foreground">Today's Micro-Experiments</span>
+        {activeExperiments.length > 0 && (
+          <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary">
+            {activeExperiments.length} Active
+          </span>
+        )}
       </div>
 
-      {/* Active Experiment Tracker */}
-      {activeExperiment && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-4 rounded-xl bg-primary/10 border border-primary/20"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Active Experiment</span>
-            </div>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="text-primary"
-              onClick={() => setShowTracker(!showTracker)}
-            >
-              {showTracker ? 'Hide Tracker' : 'Log Progress'}
-            </Button>
-          </div>
-          <h4 className="font-semibold text-foreground">{activeExperiment.title}</h4>
-          <p className="text-sm text-muted-foreground">{activeExperiment.description}</p>
-
-          {/* Experiment Tracker Form */}
-          <AnimatePresence>
-            {showTracker && (
+      {/* Active Experiments Tracker */}
+      {activeExperiments.length > 0 && (
+        <div className="mb-6 space-y-4">
+          {activeExperiments.map((exp) => {
+            const log = getLog(exp.id);
+            const isTracking = trackingExperimentId === exp.id;
+            
+            return (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-4 space-y-4"
+                key={exp.id}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 rounded-xl bg-primary/10 border border-primary/20"
               >
-                <div>
-                  <label className="text-xs font-medium text-foreground flex items-center gap-1 mb-2">
-                    <Target className="w-3 h-3" /> What did you do?
-                  </label>
-                  <Textarea
-                    value={log.what}
-                    onChange={(e) => setLog({ ...log, what: e.target.value })}
-                    placeholder="Describe the specific action you took..."
-                    className="min-h-[60px] bg-background/50 text-sm"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-xs font-medium text-foreground flex items-center gap-1 mb-2">
-                      <Clock className="w-3 h-3" /> When?
-                    </label>
-                    <input
-                      type="text"
-                      value={log.when}
-                      onChange={(e) => setLog({ ...log, when: e.target.value })}
-                      placeholder="e.g., 10:30am in standup"
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-muted focus:border-primary focus:outline-none"
-                    />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <FlaskConical className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">Active Experiment</span>
                   </div>
-                  <div>
-                    <label className="text-xs font-medium text-foreground flex items-center gap-1 mb-2">
-                      <MessageSquare className="w-3 h-3" /> Why this experiment?
-                    </label>
-                    <input
-                      type="text"
-                      value={log.why}
-                      onChange={(e) => setLog({ ...log, why: e.target.value })}
-                      placeholder="What prompted you?"
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-muted focus:border-primary focus:outline-none"
-                    />
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="text-primary h-8"
+                      onClick={() => setTrackingExperimentId(isTracking ? null : exp.id)}
+                    >
+                      {isTracking ? 'Hide Tracker' : 'Log Progress'}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-muted-foreground h-8"
+                      onClick={() => handleDeactivate(exp.id)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
+                <h4 className="font-semibold text-foreground">{exp.title}</h4>
+                <p className="text-sm text-muted-foreground">{exp.description}</p>
 
-                <div>
-                  <label className="text-xs font-medium text-foreground mb-2 block">
-                    <Smile className="w-3 h-3 inline mr-1" /> How did you feel?
-                  </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-xs text-muted-foreground block mb-2">Before</span>
-                      <div className="flex gap-1">
-                        {feelingScale.map((f) => (
-                          <button
-                            key={f.value}
-                            onClick={() => setLog({ ...log, feelingBefore: f.value })}
-                            className={`flex-1 p-2 rounded text-center transition-all ${
-                              log.feelingBefore === f.value
-                                ? 'bg-secondary/20 border border-secondary'
-                                : 'bg-muted/30 border border-transparent'
-                            }`}
-                          >
-                            <span className="text-lg">{f.emoji}</span>
-                          </button>
-                        ))}
+                {/* Experiment Tracker Form */}
+                <AnimatePresence>
+                  {isTracking && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-4 space-y-4"
+                    >
+                      <div>
+                        <label className="text-xs font-medium text-foreground flex items-center gap-1 mb-2">
+                          <Target className="w-3 h-3" /> What did you do?
+                        </label>
+                        <Textarea
+                          value={log.what}
+                          onChange={(e) => updateLog(exp.id, 'what', e.target.value)}
+                          placeholder="Describe the specific action you took..."
+                          className="min-h-[60px] bg-background/50 text-sm"
+                        />
                       </div>
-                    </div>
-                    <div>
-                      <span className="text-xs text-muted-foreground block mb-2">After</span>
-                      <div className="flex gap-1">
-                        {feelingScale.map((f) => (
-                          <button
-                            key={f.value}
-                            onClick={() => setLog({ ...log, feelingAfter: f.value })}
-                            className={`flex-1 p-2 rounded text-center transition-all ${
-                              log.feelingAfter === f.value
-                                ? 'bg-primary/20 border border-primary'
-                                : 'bg-muted/30 border border-transparent'
-                            }`}
-                          >
-                            <span className="text-lg">{f.emoji}</span>
-                          </button>
-                        ))}
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-medium text-foreground flex items-center gap-1 mb-2">
+                            <Clock className="w-3 h-3" /> When?
+                          </label>
+                          <input
+                            type="text"
+                            value={log.when}
+                            onChange={(e) => updateLog(exp.id, 'when', e.target.value)}
+                            placeholder="e.g., 10:30am in standup"
+                            className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-muted focus:border-primary focus:outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-foreground flex items-center gap-1 mb-2">
+                            <MessageSquare className="w-3 h-3" /> Why this experiment?
+                          </label>
+                          <input
+                            type="text"
+                            value={log.why}
+                            onChange={(e) => updateLog(exp.id, 'why', e.target.value)}
+                            placeholder="What prompted you?"
+                            className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-muted focus:border-primary focus:outline-none"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div>
-                  <label className="text-xs font-medium text-foreground mb-2 block">
-                    What was the outcome?
-                  </label>
-                  <Textarea
-                    value={log.outcome}
-                    onChange={(e) => setLog({ ...log, outcome: e.target.value })}
-                    placeholder="What did you notice? Any insights?"
-                    className="min-h-[60px] bg-background/50 text-sm"
-                  />
-                </div>
+                      <div>
+                        <label className="text-xs font-medium text-foreground mb-2 block">
+                          <Smile className="w-3 h-3 inline mr-1" /> How did you feel?
+                        </label>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-xs text-muted-foreground block mb-2">Before</span>
+                            <div className="flex gap-1">
+                              {feelingScale.map((f) => (
+                                <button
+                                  key={f.value}
+                                  onClick={() => updateLog(exp.id, 'feelingBefore', f.value)}
+                                  className={`flex-1 p-2 rounded text-center transition-all ${
+                                    log.feelingBefore === f.value
+                                      ? 'bg-secondary/20 border border-secondary'
+                                      : 'bg-muted/30 border border-transparent'
+                                  }`}
+                                >
+                                  <span className="text-lg">{f.emoji}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-xs text-muted-foreground block mb-2">After</span>
+                            <div className="flex gap-1">
+                              {feelingScale.map((f) => (
+                                <button
+                                  key={f.value}
+                                  onClick={() => updateLog(exp.id, 'feelingAfter', f.value)}
+                                  className={`flex-1 p-2 rounded text-center transition-all ${
+                                    log.feelingAfter === f.value
+                                      ? 'bg-primary/20 border border-primary'
+                                      : 'bg-muted/30 border border-transparent'
+                                  }`}
+                                >
+                                  <span className="text-lg">{f.emoji}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  onClick={handleComplete}
-                >
-                  <Check className="w-4 h-4 mr-2" />
-                  Complete Experiment
-                </Button>
+                      <div>
+                        <label className="text-xs font-medium text-foreground mb-2 block">
+                          What was the outcome?
+                        </label>
+                        <Textarea
+                          value={log.outcome}
+                          onChange={(e) => updateLog(exp.id, 'outcome', e.target.value)}
+                          placeholder="What did you notice? Any insights?"
+                          className="min-h-[60px] bg-background/50 text-sm"
+                        />
+                      </div>
+
+                      <Button 
+                        className="w-full bg-primary hover:bg-primary/90"
+                        onClick={() => handleComplete(exp.id)}
+                      >
+                        <Check className="w-4 h-4 mr-2" />
+                        Complete Experiment
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
+            );
+          })}
+        </div>
       )}
 
       {/* Experiment List */}
@@ -282,7 +327,7 @@ export const MicroExperimentsSection = () => {
               }`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (exp.active) setShowTracker(true);
+                if (exp.active) setTrackingExperimentId(exp.id);
               }}
             >
               {exp.completed && <span className="text-xs">✓</span>}
