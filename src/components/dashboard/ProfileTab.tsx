@@ -6,9 +6,11 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ContactSection } from './ContactSection';
+import { AccountSettingsModal } from './AccountSettingsModal';
 import h2hLogo from '../../assets/h2h-logo-light.png';
 
 interface ProfileTabProps {
@@ -20,17 +22,30 @@ interface ProfileTabProps {
     streak: number;
   };
   userId?: string;
+  avatarUrl?: string | null;
   onNavigateToArchetype?: () => void;
   onNavigateToShadow?: () => void;
+  onProfileUpdate?: (updates: { displayName?: string; avatarUrl?: string }) => void;
+  onSignOut?: () => void;
 }
 
-export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavigateToShadow }: ProfileTabProps) => {
+export const ProfileTab = ({ userProfile, userId, avatarUrl, onNavigateToArchetype, onNavigateToShadow, onProfileUpdate, onSignOut }: ProfileTabProps) => {
   const [email, setEmail] = useState('');
   const [weeklyDigestEnabled, setWeeklyDigestEnabled] = useState(true);
   const [isSavingEmail, setIsSavingEmail] = useState(false);
   const [isSendingDigest, setIsSendingDigest] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [isSendingVerification, setIsSendingVerification] = useState(false);
+  const [showAccountSettings, setShowAccountSettings] = useState(false);
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   useEffect(() => {
     if (userId) {
@@ -159,9 +174,12 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-secondary/5 rounded-full blur-3xl" />
             
             <div className="relative flex flex-col md:flex-row items-start gap-6">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-turquoise">
-                <User className="w-12 h-12 text-primary-foreground" />
-              </div>
+              <Avatar className="w-24 h-24 rounded-2xl border-2 border-primary/20 glow-turquoise">
+                <AvatarImage src={avatarUrl || undefined} alt={userProfile.name} className="object-cover" />
+                <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-accent text-primary-foreground text-2xl font-display">
+                  {getInitials(userProfile.name)}
+                </AvatarFallback>
+              </Avatar>
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
@@ -483,15 +501,38 @@ export const ProfileTab = ({ userProfile, userId, onNavigateToArchetype, onNavig
             transition={{ delay: 0.5 }}
             className="space-y-2"
           >
-            <Button variant="outline" className="w-full justify-start">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => setShowAccountSettings(true)}
+            >
               <Settings className="w-4 h-4 mr-3" />
               Account Settings
             </Button>
-            <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-destructive">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-muted-foreground hover:text-destructive"
+              onClick={onSignOut}
+            >
               <LogOut className="w-4 h-4 mr-3" />
               Sign Out
             </Button>
           </motion.div>
+
+          {/* Account Settings Modal */}
+          {userId && (
+            <AccountSettingsModal
+              isOpen={showAccountSettings}
+              onClose={() => setShowAccountSettings(false)}
+              userId={userId}
+              displayName={userProfile.name}
+              avatarUrl={avatarUrl || null}
+              onUpdate={(updates) => {
+                onProfileUpdate?.(updates);
+                setShowAccountSettings(false);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>

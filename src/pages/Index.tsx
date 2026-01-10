@@ -22,12 +22,13 @@ import { toast } from 'sonner';
 type AppState = 'auth' | 'journey-intro' | 'assessment' | 'dashboard';
 
 const Index = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { createCommitment, getActiveCommitments } = useCommitments();
   const [searchParams, setSearchParams] = useSearchParams();
   const [appState, setAppState] = useState<AppState>('auth');
   const [activeTab, setActiveTab] = useState('home');
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState({
     name: 'Leader',
     archetype: 'The Hero',
@@ -95,6 +96,7 @@ const Index = () => {
             tier: profile.tier || 'Explorer',
             streak: profile.streak || 0,
           }));
+          setAvatarUrl(profile.avatar_url || null);
           setAppState('dashboard');
         } else {
           // User needs to complete onboarding
@@ -162,6 +164,21 @@ const Index = () => {
     }
   };
 
+  const handleProfileUpdate = (updates: { displayName?: string; avatarUrl?: string }) => {
+    if (updates.displayName) {
+      setUserProfile(prev => ({ ...prev, name: updates.displayName! }));
+    }
+    if (updates.avatarUrl) {
+      setAvatarUrl(updates.avatarUrl);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setAppState('auth');
+    setActiveTab('home');
+  };
+
   const renderDashboardContent = () => {
     switch (activeTab) {
       case 'home':
@@ -175,7 +192,17 @@ const Index = () => {
       case 'architect':
         return <ArchitectTab userContext={userProfile} userId={user?.id} />;
       case 'profile':
-        return <ProfileTab userProfile={userProfile} userId={user?.id} onNavigateToArchetype={() => setActiveTab('archetype-analysis')} onNavigateToShadow={() => setActiveTab('shadow-report')} />;
+        return (
+          <ProfileTab 
+            userProfile={userProfile} 
+            userId={user?.id} 
+            avatarUrl={avatarUrl}
+            onNavigateToArchetype={() => setActiveTab('archetype-analysis')} 
+            onNavigateToShadow={() => setActiveTab('shadow-report')}
+            onProfileUpdate={handleProfileUpdate}
+            onSignOut={handleSignOut}
+          />
+        );
       case 'archetype-analysis':
         return <ArchetypeAnalysisPage userProfile={userProfile} onBack={() => setActiveTab('profile')} />;
       case 'shadow-report':

@@ -297,6 +297,7 @@ export type Database = {
       profiles: {
         Row: {
           archetype: string | null
+          avatar_url: string | null
           created_at: string
           display_name: string | null
           email: string | null
@@ -314,6 +315,7 @@ export type Database = {
         }
         Insert: {
           archetype?: string | null
+          avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
@@ -331,6 +333,7 @@ export type Database = {
         }
         Update: {
           archetype?: string | null
+          avatar_url?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
