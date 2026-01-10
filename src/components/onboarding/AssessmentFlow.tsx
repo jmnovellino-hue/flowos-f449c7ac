@@ -232,20 +232,47 @@ const icebergPrompts = [
   {
     id: 'behavior',
     label: 'Visible Behavior',
-    placeholder: 'The specific action you want to change...',
+    subtitle: 'The Tip of the Iceberg',
+    placeholder: 'Describe a specific action or habit you want to change...',
     example: 'e.g., I constantly check emails during meetings',
+    explanation: 'Just like an iceberg, only 10% of our behavior is visible above the waterline. This is what others see — your actions, reactions, and habits. Identifying the specific behavior you want to change is the first step toward lasting transformation.',
+    whyItMatters: 'By naming the behavior explicitly, you create awareness. Awareness is the catalyst for change. Without a clear target, transformation remains abstract.',
+    howToComplete: 'Think of a recurring behavior that undermines your effectiveness or wellbeing. Be specific — instead of "I procrastinate," write "I delay starting important presentations until the last 48 hours."',
+    tips: [
+      'Focus on actions, not traits (what you do, not who you are)',
+      'Choose something that happens regularly',
+      'Be honest — this is for your growth',
+    ],
   },
   {
     id: 'feeling',
     label: 'Waterline Feeling',
-    placeholder: 'The immediate emotional trigger...',
+    subtitle: 'Just Below the Surface',
+    placeholder: 'What emotion triggers or accompanies this behavior...',
     example: 'e.g., A spike of anxiety that I am missing critical info',
+    explanation: 'Beneath every behavior lies an emotional trigger — the feeling that sparks the action. This operates at your "waterline," often just out of conscious awareness. These feelings are the bridge between what you do and why you do it.',
+    whyItMatters: 'Emotions are data. When you understand the feeling driving your behavior, you gain the power to interrupt the pattern. Instead of reacting unconsciously, you can choose a different response.',
+    howToComplete: 'When you engage in the behavior you identified, pause and ask: "What am I feeling right now?" Name the emotion — anxiety, fear, inadequacy, overwhelm, restlessness.',
+    tips: [
+      'Use feeling words: anxious, frustrated, inadequate, overwhelmed',
+      'Notice physical sensations too: tight chest, racing thoughts',
+      'There are no wrong answers — all feelings are valid data',
+    ],
   },
   {
     id: 'belief',
     label: 'Deep Belief',
-    placeholder: 'The root narrative driving this behavior...',
+    subtitle: 'The Hidden Foundation',
+    placeholder: 'The core belief or narrative driving everything...',
     example: 'e.g., My value as a leader depends on being the most responsive person',
+    explanation: 'At the deepest level — the massive base of the iceberg hidden underwater — lies your core belief. This is the fundamental story you tell yourself about who you are, what you deserve, or how the world works. It\'s often formed early in life and operates unconsciously.',
+    whyItMatters: 'Core beliefs are the root cause. Changing behaviors without addressing beliefs is like cutting weeds without pulling the roots — they always grow back. When you excavate and examine your deep beliefs, you can consciously choose which ones to keep and which to transform.',
+    howToComplete: 'Ask yourself: "What must I believe about myself or the world for this feeling to make sense?" Complete this sentence: "Deep down, I believe that..."',
+    tips: [
+      'Look for "I am" or "I must" statements',
+      'Consider: What would happen if you stopped this behavior?',
+      'These beliefs often sound like rules: "Leaders must always..."',
+    ],
   },
 ];
 
@@ -756,21 +783,96 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -50 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-8"
+                className="space-y-6"
               >
-                <div className="text-center mb-8">
+                {/* Header with concept explanation */}
+                <div className="text-center mb-6">
                   <span className="inline-block px-3 py-1 rounded-full bg-accent/20 text-accent-foreground text-xs font-medium mb-4">
-                    The Iceberg Commitment
+                    The Iceberg Commitment — Step {currentQuestion + 1} of 3
                   </span>
-                  <h2 className="text-2xl md:text-3xl font-display text-foreground mb-2">
+                  <h2 className="text-2xl md:text-3xl font-display text-foreground mb-1">
                     {icebergPrompts[currentQuestion].label}
                   </h2>
-                  <p className="text-muted-foreground">
-                    {icebergPrompts[currentQuestion].example}
+                  <p className="text-sm text-primary font-medium">
+                    {icebergPrompts[currentQuestion].subtitle}
                   </p>
                 </div>
 
-                <div className="glass-surface rounded-2xl p-8">
+                {/* Main explanation card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="glass-surface rounded-2xl p-6 border-l-4 border-l-primary"
+                >
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-foreground mb-2">What is this?</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {icebergPrompts[currentQuestion].explanation}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Why it matters */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="glass-surface rounded-2xl p-6"
+                >
+                  <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                    <span className="text-primary">✦</span> Why This Matters
+                  </h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {icebergPrompts[currentQuestion].whyItMatters}
+                  </p>
+                </motion.div>
+
+                {/* How to complete + Tips */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="glass-surface rounded-2xl p-6"
+                >
+                  <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
+                    <span className="text-primary">✦</span> How to Complete This Step
+                  </h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                    {icebergPrompts[currentQuestion].howToComplete}
+                  </p>
+                  
+                  <div className="bg-muted/30 rounded-xl p-4">
+                    <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Tips</h5>
+                    <ul className="space-y-2">
+                      {icebergPrompts[currentQuestion].tips.map((tip, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm text-foreground/80">
+                          <span className="text-primary mt-0.5">•</span>
+                          {tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+
+                {/* Input area */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="glass-surface rounded-2xl p-6"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium text-foreground">Your Response</h4>
+                    <span className="text-xs text-muted-foreground italic">
+                      {icebergPrompts[currentQuestion].example}
+                    </span>
+                  </div>
                   <textarea
                     value={icebergAnswers[icebergPrompts[currentQuestion].id as keyof typeof icebergAnswers]}
                     onChange={(e) => setIcebergAnswers({
@@ -780,9 +882,30 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                     placeholder={icebergPrompts[currentQuestion].placeholder}
                     className="w-full h-32 bg-muted/50 border border-border/50 rounded-xl p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 resize-none"
                   />
-                </div>
+                </motion.div>
 
-                <div className="flex justify-between items-center">
+                {/* Iceberg visual indicator */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex justify-center gap-2 py-2"
+                >
+                  {icebergPrompts.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        index === currentQuestion
+                          ? 'w-8 bg-primary'
+                          : index < currentQuestion
+                            ? 'w-2 bg-primary/60'
+                            : 'w-2 bg-muted'
+                      }`}
+                    />
+                  ))}
+                </motion.div>
+
+                <div className="flex justify-between items-center pt-2">
                   <Button
                     variant="ghost"
                     onClick={() => {
