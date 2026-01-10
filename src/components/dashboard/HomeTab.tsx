@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
-import { Flame, TrendingUp, Target, Quote, ChevronRight, Zap } from 'lucide-react';
+import { Flame, TrendingUp, Target, Quote, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { JournalingSection } from './JournalingSection';
+import { MicroExperimentsSection } from './MicroExperimentsSection';
 
 interface HomeTabProps {
   userProfile: {
@@ -22,11 +24,6 @@ const dailyWisdom = {
   category: "Shadow Work"
 };
 
-const microExperiments = [
-  { id: 1, title: 'The 3-Second Pause', description: 'Wait 3 seconds before answering any question', completed: false },
-  { id: 2, title: 'Energy Audit', description: 'Log your energy levels after each meeting', completed: true },
-  { id: 3, title: 'Delegation Win', description: 'Delegate one task you would normally do yourself', completed: false },
-];
 
 export const HomeTab = ({ userProfile }: HomeTabProps) => {
   const getGreeting = () => {
@@ -116,43 +113,10 @@ export const HomeTab = ({ userProfile }: HomeTabProps) => {
           )}
 
           {/* Micro-Experiments */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="glass-surface rounded-2xl p-6"
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <Zap className="w-5 h-5 text-primary" />
-              <span className="font-medium text-foreground">Today's Micro-Experiments</span>
-            </div>
-            <div className="space-y-3">
-              {microExperiments.map((exp) => (
-                <div
-                  key={exp.id}
-                  className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
-                    exp.completed ? 'bg-primary/10' : 'bg-muted/50 hover:bg-muted'
-                  }`}
-                >
-                  <button
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      exp.completed
-                        ? 'bg-primary border-primary text-primary-foreground'
-                        : 'border-muted-foreground hover:border-primary'
-                    }`}
-                  >
-                    {exp.completed && <span className="text-xs">✓</span>}
-                  </button>
-                  <div className="flex-1">
-                    <h4 className={`font-medium ${exp.completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
-                      {exp.title}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">{exp.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
+          <MicroExperimentsSection />
+
+          {/* Daily Journal */}
+          <JournalingSection />
         </div>
 
         {/* Side Column */}
