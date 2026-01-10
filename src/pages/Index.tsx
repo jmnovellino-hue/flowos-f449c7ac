@@ -145,7 +145,7 @@ const Index = () => {
       case 'architect':
         return <ArchitectTab userContext={userProfile} userId={user?.id} />;
       case 'profile':
-        return <ProfileTab userProfile={userProfile} onNavigateToArchetype={() => setActiveTab('archetype-analysis')} onNavigateToShadow={() => setActiveTab('shadow-report')} />;
+        return <ProfileTab userProfile={userProfile} userId={user?.id} onNavigateToArchetype={() => setActiveTab('archetype-analysis')} onNavigateToShadow={() => setActiveTab('shadow-report')} />;
       case 'archetype-analysis':
         return <ArchetypeAnalysisPage userProfile={userProfile} onBack={() => setActiveTab('profile')} />;
       case 'shadow-report':
