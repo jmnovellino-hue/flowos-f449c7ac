@@ -7,3 +7,7 @@ verify_jwt = false
 [functions.text-to-speech]
 enabled = true
 verify_jwt = false
+
+[functions.architect-chat]
+enabled = true
+verify_jwt = false
