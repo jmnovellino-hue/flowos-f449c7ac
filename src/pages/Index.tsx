@@ -9,7 +9,10 @@ import { StudioTab } from '@/components/dashboard/StudioTab';
 import { LabTab } from '@/components/dashboard/LabTab';
 import { ArchitectTab } from '@/components/dashboard/ArchitectTab';
 import { ProfileTab } from '@/components/dashboard/ProfileTab';
+import { ArchetypeAnalysisPage } from '@/components/dashboard/ArchetypeAnalysisPage';
+import { ShadowReportPage } from '@/components/dashboard/ShadowReportPage';
 import { initializeReminders } from '@/lib/notifications';
+import { initializeContentNotifications } from '@/lib/contentNotifications';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommitments } from '@/hooks/useCommitments';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,9 +33,10 @@ const Index = () => {
     streak: 12,
   });
 
-  // Initialize commitment reminders on app load
+  // Initialize reminders and content notifications on app load
   useEffect(() => {
     initializeReminders();
+    initializeContentNotifications();
   }, []);
 
   // Check if user has completed onboarding
@@ -141,7 +145,11 @@ const Index = () => {
       case 'architect':
         return <ArchitectTab />;
       case 'profile':
-        return <ProfileTab userProfile={userProfile} />;
+        return <ProfileTab userProfile={userProfile} onNavigateToArchetype={() => setActiveTab('archetype-analysis')} onNavigateToShadow={() => setActiveTab('shadow-report')} />;
+      case 'archetype-analysis':
+        return <ArchetypeAnalysisPage userProfile={userProfile} onBack={() => setActiveTab('profile')} />;
+      case 'shadow-report':
+        return <ShadowReportPage userProfile={userProfile} onBack={() => setActiveTab('profile')} />;
       default:
         return <HomeTab userProfile={userProfile} onNavigateToProfile={() => setActiveTab('profile')} />;
     }

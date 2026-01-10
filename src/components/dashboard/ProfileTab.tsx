@@ -12,9 +12,11 @@ interface ProfileTabProps {
     tier: string;
     streak: number;
   };
+  onNavigateToArchetype?: () => void;
+  onNavigateToShadow?: () => void;
 }
 
-export const ProfileTab = ({ userProfile }: ProfileTabProps) => {
+export const ProfileTab = ({ userProfile, onNavigateToArchetype, onNavigateToShadow }: ProfileTabProps) => {
   const shadowTraits = [
     { name: 'Martyr Syndrome', level: 72, description: 'Tendency to overwork and sacrifice personal needs' },
     { name: 'Control Compulsion', level: 58, description: 'Difficulty delegating and trusting others' },
@@ -120,8 +122,28 @@ export const ProfileTab = ({ userProfile }: ProfileTabProps) => {
               ))}
             </div>
 
-            <Button variant="outline" className="w-full mt-6">
+            <Button variant="outline" className="w-full mt-6" onClick={onNavigateToShadow}>
               View Full Shadow Report
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Button>
+          </motion.div>
+
+          {/* Archetype Analysis Link */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="glass-surface rounded-2xl p-6"
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Crown className="w-5 h-5 text-secondary" />
+              <span className="font-medium text-foreground">Archetype Analysis</span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Explore your full leadership archetype breakdown including strengths, challenges, and growth path.
+            </p>
+            <Button variant="outline" className="w-full" onClick={onNavigateToArchetype}>
+              View Full Analysis
               <ChevronRight className="w-4 h-4 ml-2" />
             </Button>
           </motion.div>
