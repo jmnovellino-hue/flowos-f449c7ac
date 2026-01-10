@@ -1,10 +1,11 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, Headphones, Clock, Lock, Brain, Moon, Zap, Volume2, Sparkles, Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Play, Pause, Headphones, Clock, Lock, Brain, Moon, Zap, Volume2, Sparkles, Heart } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MeditationBuilder } from '@/components/studio/MeditationBuilder';
 import { PerformanceBuilder } from '@/components/studio/PerformanceBuilder';
 import { ScriptViewer } from '@/components/studio/ScriptViewer';
+import { useAudioScripts } from '@/hooks/useAudioScripts';
 
 interface AudioCategory {
   id: string;
@@ -137,7 +138,10 @@ export const StudioTab = () => {
   const [playing, setPlaying] = useState<string | null>(null);
   const [showMeditationBuilder, setShowMeditationBuilder] = useState(false);
   const [showPerformanceBuilder, setShowPerformanceBuilder] = useState(false);
-  const [generatedScript, setGeneratedScript] = useState<{ script: string; title: string } | null>(null);
+  const [generatedScript, setGeneratedScript] = useState<{ script: string; title: string; category: 'meditation' | 'performance' } | null>(null);
+  const [viewingSavedScript, setViewingSavedScript] = useState<{ id: string; script: string; title: string; category: 'meditation' | 'performance'; isFavorite: boolean; audioUrl?: string } | null>(null);
+
+  const { scripts, favorites, saveScript, toggleFavorite, loading } = useAudioScripts();
 
   const activeCategoryData = audioCategories.find(c => c.id === activeCategory);
   const CategoryIcon = activeCategoryData?.icon || Headphones;
@@ -151,14 +155,23 @@ export const StudioTab = () => {
     }
   };
 
+  const getSavedScriptsForCategory = () => {
+    if (activeCategory === 'sleep') return [];
+    return scripts.filter(s => s.category === activeCategory);
+  };
+
   const handleMeditationComplete = (script: string) => {
     setShowMeditationBuilder(false);
-    setGeneratedScript({ script, title: 'Custom Meditation' });
+    setGeneratedScript({ script, title: 'Custom Meditation', category: 'meditation' });
   };
 
   const handlePerformanceComplete = (script: string, situation: string) => {
     setShowPerformanceBuilder(false);
-    setGeneratedScript({ script, title: `Primer: ${situation}` });
+    setGeneratedScript({ script, title: `Primer: ${situation}`, category: 'performance' });
+  };
+
+  const handleSaveScript = async (title: string, script: string, category: 'meditation' | 'performance') => {
+    return await saveScript(title, script, category);
   };
 
   return (
@@ -265,6 +278,92 @@ export const StudioTab = () => {
         )}
       </motion.div>
 
+      {/* Favorites Section */}
+      {favorites.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
+            <Heart className="w-4 h-4 text-red-500" />
+            Favorites
+          </h3>
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
+            {favorites.map((script) => (
+              <button
+                key={script.id}
+                onClick={() => setViewingSavedScript({
+                  id: script.id,
+                  script: script.script,
+                  title: script.title,
+                  category: script.category,
+                  isFavorite: script.is_favorite,
+                  audioUrl: script.audio_url || undefined,
+                })}
+                className="flex-shrink-0 glass-surface rounded-xl p-4 hover:border-primary/30 transition-all text-left min-w-[200px]"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+                  <span className="text-xs text-muted-foreground capitalize">{script.category}</span>
+                </div>
+                <h4 className="font-medium text-foreground truncate">{script.title}</h4>
+              </button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Saved Scripts Section */}
+      {getSavedScriptsForCategory().length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="mb-8"
+        >
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-3">
+            <Sparkles className="w-4 h-4 text-primary" />
+            Your Library
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2">
+            {getSavedScriptsForCategory().map((script) => (
+              <motion.button
+                key={script.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => setViewingSavedScript({
+                  id: script.id,
+                  script: script.script,
+                  title: script.title,
+                  category: script.category,
+                  isFavorite: script.is_favorite,
+                  audioUrl: script.audio_url || undefined,
+                })}
+                className="glass-surface rounded-xl p-5 flex items-start gap-4 group hover:border-primary/30 transition-all text-left"
+              >
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary">AI Generated</span>
+                    {script.is_favorite && <Heart className="w-3 h-3 text-red-500 fill-red-500" />}
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-1 truncate group-hover:text-primary transition-colors">
+                    {script.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-1">
+                    {script.script.substring(0, 80)}...
+                  </p>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      )}
+
       {/* Audio Grid */}
       <div className="space-y-3">
         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
@@ -353,7 +452,21 @@ export const StudioTab = () => {
         <ScriptViewer
           script={generatedScript.script}
           title={generatedScript.title}
+          category={generatedScript.category}
           onClose={() => setGeneratedScript(null)}
+          onSave={handleSaveScript}
+        />
+      )}
+      {viewingSavedScript && (
+        <ScriptViewer
+          script={viewingSavedScript.script}
+          title={viewingSavedScript.title}
+          category={viewingSavedScript.category}
+          savedScriptId={viewingSavedScript.id}
+          isFavorite={viewingSavedScript.isFavorite}
+          onToggleFavorite={toggleFavorite}
+          existingAudioUrl={viewingSavedScript.audioUrl}
+          onClose={() => setViewingSavedScript(null)}
         />
       )}
     </div>

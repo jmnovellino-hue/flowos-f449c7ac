@@ -3,3 +3,7 @@ project_id = "fjiwlffbtijxzhreqrst"
 [functions.generate-audio-script]
 enabled = true
 verify_jwt = false
+
+[functions.text-to-speech]
+enabled = true
+verify_jwt = false
