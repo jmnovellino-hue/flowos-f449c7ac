@@ -277,7 +277,7 @@ const icebergPrompts = [
 ];
 
 export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
-  const [phase, setPhase] = useState<'archetype' | 'results' | 'compass' | 'values' | 'iceberg'>('archetype');
+  const [phase, setPhase] = useState<'archetype' | 'results' | 'compass' | 'values' | 'iceberg-intro' | 'iceberg'>('archetype');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [archetypeAnswers, setArchetypeAnswers] = useState<Record<number, number>>({});
   const [compassAnswers, setCompassAnswers] = useState<Record<number, string[]>>({});
@@ -289,12 +289,13 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
     belief: '',
   });
 
-  const totalQuestions = archetypeQuestions.length + compassScenarios.length + 1 + 3; // +1 for value selection, +3 for iceberg
+  const totalQuestions = archetypeQuestions.length + compassScenarios.length + 1 + 1 + 3; // +1 for value selection, +1 for iceberg intro, +3 for iceberg
   const currentProgress = 
     phase === 'archetype' ? currentQuestion :
     phase === 'compass' ? archetypeQuestions.length + currentQuestion :
     phase === 'values' ? archetypeQuestions.length + compassScenarios.length :
-    archetypeQuestions.length + compassScenarios.length + 1 + currentQuestion;
+    phase === 'iceberg-intro' ? archetypeQuestions.length + compassScenarios.length + 1 :
+    archetypeQuestions.length + compassScenarios.length + 2 + currentQuestion;
 
   const calculateSuggestedCategories = () => {
     // Count value occurrences from compass answers
@@ -416,6 +417,10 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
   };
 
   const handleValuesComplete = () => {
+    setPhase('iceberg-intro');
+  };
+
+  const handleIcebergIntroComplete = () => {
     setPhase('iceberg');
     setCurrentQuestion(0);
   };
@@ -769,6 +774,187 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                     className="bg-primary hover:bg-primary/90 text-primary-foreground glow-emerald px-8"
                   >
                     Continue to The Iceberg
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Iceberg Intro Phase */}
+            {phase === 'iceberg-intro' && (
+              <motion.div
+                key="iceberg-intro"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-8"
+              >
+                <div className="text-center mb-6">
+                  <span className="inline-block px-3 py-1 rounded-full bg-accent/20 text-accent-foreground text-xs font-medium mb-4">
+                    The Iceberg Commitment
+                  </span>
+                  <h2 className="text-2xl md:text-3xl font-display text-foreground mb-4">
+                    Understanding Your Hidden Depths
+                  </h2>
+                  <p className="text-muted-foreground max-w-xl mx-auto">
+                    Like an iceberg, only a small fraction of who we are is visible to the world. 
+                    Let's explore the three layers that shape your leadership.
+                  </p>
+                </div>
+
+                {/* Visual Iceberg Diagram */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="relative max-w-md mx-auto"
+                >
+                  {/* Waterline indicator */}
+                  <div className="absolute left-0 right-0 top-[88px] flex items-center z-10">
+                    <div className="flex-1 h-px bg-blue-400/50" />
+                    <span className="px-3 text-xs text-blue-400 font-medium whitespace-nowrap">~ Waterline ~</span>
+                    <div className="flex-1 h-px bg-blue-400/50" />
+                  </div>
+
+                  {/* Iceberg SVG visualization */}
+                  <div className="relative">
+                    {/* Above water - Visible Behavior */}
+                    <motion.div
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                      className="relative h-24 flex items-center justify-center"
+                    >
+                      <div 
+                        className="w-32 h-20 bg-gradient-to-b from-primary/40 to-primary/60 rounded-t-full flex items-center justify-center"
+                        style={{ clipPath: 'polygon(20% 100%, 80% 100%, 100% 0, 0 0)' }}
+                      >
+                        <span className="text-xs font-medium text-primary-foreground/90 text-center px-2">
+                          10% Visible
+                        </span>
+                      </div>
+                    </motion.div>
+
+                    {/* Water surface effect */}
+                    <div className="h-2 bg-gradient-to-b from-blue-500/20 to-blue-600/40 rounded-sm" />
+
+                    {/* Below water - Hidden layers */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 }}
+                      className="relative bg-gradient-to-b from-blue-600/30 via-blue-700/40 to-blue-900/50 rounded-b-3xl pt-4 pb-8"
+                    >
+                      <div className="flex flex-col items-center">
+                        {/* Middle section - Feelings */}
+                        <div 
+                          className="w-48 h-24 bg-gradient-to-b from-primary/50 to-primary/70 flex items-center justify-center mb-2"
+                          style={{ clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0 100%)' }}
+                        >
+                          <span className="text-xs font-medium text-primary-foreground/90 text-center px-4">
+                            Feelings & Emotions
+                          </span>
+                        </div>
+
+                        {/* Bottom section - Beliefs */}
+                        <div 
+                          className="w-64 h-28 bg-gradient-to-b from-primary/70 to-primary flex items-center justify-center"
+                          style={{ clipPath: 'polygon(5% 0, 95% 0, 80% 100%, 20% 100%)', borderRadius: '0 0 50% 50%' }}
+                        >
+                          <span className="text-xs font-medium text-primary-foreground text-center px-4">
+                            Deep Beliefs & Stories
+                          </span>
+                        </div>
+
+                        <span className="text-xs text-blue-300/70 mt-4">90% Hidden</span>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
+
+                {/* Three Layer Explanations */}
+                <div className="space-y-4 max-w-lg mx-auto">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="glass-surface rounded-xl p-4 border-l-4 border-l-primary/60"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 text-sm font-bold text-primary">
+                        1
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">Visible Behavior</h4>
+                        <p className="text-sm text-muted-foreground">
+                          The actions others can see — your habits, reactions, and patterns that play out in the world.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="glass-surface rounded-xl p-4 border-l-4 border-l-primary/70"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/30 flex items-center justify-center flex-shrink-0 text-sm font-bold text-primary">
+                        2
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">Waterline Feelings</h4>
+                        <p className="text-sm text-muted-foreground">
+                          The emotional triggers just below the surface — anxiety, fear, frustration — that spark your behaviors.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.7 }}
+                    className="glass-surface rounded-xl p-4 border-l-4 border-l-primary"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 rounded-full bg-primary/40 flex items-center justify-center flex-shrink-0 text-sm font-bold text-primary-foreground">
+                        3
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-foreground">Deep Beliefs</h4>
+                        <p className="text-sm text-muted-foreground">
+                          The foundational narratives about yourself and the world — often formed early in life — that drive everything above.
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Purpose explanation */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className="glass-surface rounded-2xl p-6 text-center max-w-lg mx-auto"
+                >
+                  <Sparkles className="w-6 h-6 text-primary mx-auto mb-3" />
+                  <h4 className="font-medium text-foreground mb-2">Why This Matters</h4>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Lasting change happens from the bottom up. By uncovering the beliefs beneath your behaviors, 
+                    you gain the power to transform patterns that no longer serve you. In the next steps, 
+                    you'll identify one behavior you want to change and trace it to its root.
+                  </p>
+                </motion.div>
+
+                <div className="flex justify-center pt-4">
+                  <Button
+                    onClick={handleIcebergIntroComplete}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground glow-emerald px-8"
+                  >
+                    Begin The Iceberg
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
