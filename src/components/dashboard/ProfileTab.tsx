@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut } from 'lucide-react';
+import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import h2hLogo from '../../assets/h2h-logo-light.png';
@@ -215,11 +215,37 @@ export const ProfileTab = ({ userProfile }: ProfileTabProps) => {
             </div>
           </motion.div>
 
-          {/* Actions */}
+          {/* About H2H */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
+            className="glass-surface rounded-2xl p-6"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <img src={h2hLogo} alt="The H2H Experiment" className="h-8 w-auto" />
+              <span className="font-medium text-foreground">The H2H Experiment</span>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              FlowOS is part of the H2H Inner Lab program – a transformative journey for conscious leaders.
+            </p>
+            <a 
+              href="https://theh2hexperiment.com/about-us" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <Button variant="outline" className="w-full glow-turquoise">
+                Learn About H2H
+                <ExternalLink className="w-4 h-4 ml-2" />
+              </Button>
+            </a>
+          </motion.div>
+
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
             className="space-y-2"
           >
             <Button variant="outline" className="w-full justify-start">

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import h2hLogo from '../../assets/h2h-logo-light.png';
+import { H2HFooter } from './H2HFooter';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -32,19 +33,19 @@ export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardL
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background neural-grid">
+    <div className="min-h-screen bg-background neural-grid flex flex-col">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 bottom-0 w-20 lg:w-64 flex-col bg-sidebar border-r border-sidebar-border z-50">
-        {/* H2H Logo */}
-        <div className="h-20 flex items-center justify-center lg:justify-start lg:px-6 border-b border-sidebar-border">
+        {/* Logo and App Name */}
+        <div className="h-24 flex items-center justify-center lg:justify-start lg:px-5 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <img src={h2hLogo} alt="H2H" className="h-8 w-auto" />
+            <img src={h2hLogo} alt="H2H" className="h-12 w-auto" />
             <div className="hidden lg:flex flex-col">
-              <span className="text-sm font-display font-semibold text-sidebar-foreground leading-tight">
-                Inner Lab
+              <span className="text-lg font-display font-bold text-sidebar-foreground leading-tight">
+                FlowOS
               </span>
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                FlowOS
+                H2H Inner Lab
               </span>
             </div>
           </div>
@@ -90,10 +91,11 @@ export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardL
 
       {/* Mobile Header */}
       <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-xl border-b border-border z-50 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <img src={h2hLogo} alt="H2H" className="h-6 w-auto" />
+        <div className="flex items-center gap-3">
+          <img src={h2hLogo} alt="H2H" className="h-10 w-auto" />
           <div className="flex flex-col">
-            <span className="text-sm font-display font-semibold leading-tight">Inner Lab</span>
+            <span className="text-base font-display font-bold leading-tight">FlowOS</span>
+            <span className="text-[9px] text-muted-foreground uppercase tracking-wider">H2H Inner Lab</span>
           </div>
         </div>
         <button
@@ -136,8 +138,13 @@ export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardL
       )}
 
       {/* Main Content */}
-      <main className="md:ml-20 lg:ml-64 min-h-screen pt-16 md:pt-0">
-        {children}
+      <main className="md:ml-20 lg:ml-64 flex-1 pt-16 md:pt-0 flex flex-col">
+        <div className="flex-1">
+          {children}
+        </div>
+        <div className="hidden md:block">
+          <H2HFooter />
+        </div>
       </main>
 
       {/* Mobile Bottom Nav */}
