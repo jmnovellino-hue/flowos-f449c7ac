@@ -68,28 +68,32 @@ export const AuthScreen = ({ onComplete }: AuthScreenProps) => {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-10 w-full max-w-md px-6"
       >
-        {/* H2H Inner Lab Branding */}
+        {/* Branding */}
         <motion.div 
           className="text-center mb-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          {/* H2H Logo */}
-          <div className="flex justify-center mb-4">
-            <img src={h2hLogo} alt="The H2H Experiment" className="h-12 w-auto" />
+          {/* H2H Logo - Bigger */}
+          <div className="flex justify-center mb-6">
+            <img src={h2hLogo} alt="The H2H Experiment" className="h-20 w-auto" />
           </div>
           
-          {/* Inner Lab Badge */}
+          {/* FlowOS App Name - Prominent */}
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-2">
+            FlowOS
+          </h1>
+          
+          {/* H2H Inner Lab Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-6">
             <span className="text-xs font-medium text-primary uppercase tracking-wider">H2H Inner Lab</span>
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-display font-semibold text-foreground mb-3">
-            Master your internal
-            <span className="block text-gradient-primary">architecture.</span>
-          </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-xl text-muted-foreground mb-2">
+            Master your internal architecture.
+          </p>
+          <p className="text-muted-foreground">
             Shape the next generation of leadership.
           </p>
         </motion.div>
