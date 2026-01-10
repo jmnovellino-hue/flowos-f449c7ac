@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      audio_scripts: {
+        Row: {
+          audio_url: string | null
+          category: string
+          config: Json | null
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          is_favorite: boolean
+          script: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_url?: string | null
+          category: string
+          config?: Json | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_favorite?: boolean
+          script: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_url?: string | null
+          category?: string
+          config?: Json | null
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_favorite?: boolean
+          script?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       commitment_logs: {
         Row: {
           commitment_id: string
