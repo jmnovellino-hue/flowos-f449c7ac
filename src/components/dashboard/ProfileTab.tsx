@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
-import { User, Shield, Crown, Target, Heart, Brain, ChevronRight, Settings, LogOut } from 'lucide-react';
+import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-
+import h2hLogo from '@/assets/h2h-logo-light.png';
 interface ProfileTabProps {
   userProfile: {
     name: string;
@@ -49,7 +49,7 @@ export const ProfileTab = ({ userProfile }: ProfileTabProps) => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/10 to-secondary/5 rounded-full blur-3xl" />
             
             <div className="relative flex flex-col md:flex-row items-start gap-6">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-emerald">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-turquoise">
                 <User className="w-12 h-12 text-primary-foreground" />
               </div>
               
@@ -196,15 +196,21 @@ export const ProfileTab = ({ userProfile }: ProfileTabProps) => {
             <div className="relative">
               <div className="flex items-center gap-2 mb-4">
                 <Shield className="w-5 h-5 text-secondary" />
-                <span className="font-medium text-foreground">Architect Tier</span>
+                <span className="font-medium text-foreground">H2H Inner Lab</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Full access to all FlowOS features including AI mentorship, Bio-analysis, and Shadow reports.
+                Full access to all Inner Lab features including AI mentorship, Bio-analysis, and Shadow reports.
               </p>
               <div className="text-2xl font-display font-bold text-secondary mb-1">
                 $99<span className="text-sm font-normal text-muted-foreground">/month</span>
               </div>
               <p className="text-xs text-muted-foreground">Renews Jan 15, 2026</p>
+              
+              {/* H2H Branding */}
+              <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2">
+                <img src={h2hLogo} alt="H2H" className="h-4 w-auto opacity-60" />
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">The H2H Experiment</span>
+              </div>
             </div>
           </motion.div>
 
