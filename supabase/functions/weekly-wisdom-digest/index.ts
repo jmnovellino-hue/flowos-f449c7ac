@@ -110,7 +110,7 @@ serve(async (req: Request): Promise<Response> => {
             "Authorization": `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
-            from: "The Architect <digest@resend.dev>",
+            from: "The Architect <hello@theh2hexperiment.com>",
             to: [profile.email],
             subject: `🏛️ Your Weekly Wisdom Digest | ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`,
             html: emailHtml,
