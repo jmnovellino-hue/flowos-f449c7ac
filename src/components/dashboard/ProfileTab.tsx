@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut, ExternalLink, Mail, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut, ExternalLink, Mail, Send, CheckCircle, AlertCircle, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ContactSection } from './ContactSection';
 import { AccountSettingsModal } from './AccountSettingsModal';
+import { SubscriptionModal } from './SubscriptionModal';
 import h2hLogo from '../../assets/h2h-logo-light.png';
 
 interface ProfileTabProps {
@@ -37,6 +38,7 @@ export const ProfileTab = ({ userProfile, userId, avatarUrl, onNavigateToArchety
   const [emailVerified, setEmailVerified] = useState(false);
   const [isSendingVerification, setIsSendingVerification] = useState(false);
   const [showAccountSettings, setShowAccountSettings] = useState(false);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   const getInitials = (name: string) => {
     return name
@@ -340,19 +342,31 @@ export const ProfileTab = ({ userProfile, userId, avatarUrl, onNavigateToArchety
             transition={{ delay: 0.25 }}
             className="glass-surface rounded-2xl p-6 relative overflow-hidden"
           >
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-secondary/20 to-primary/10 rounded-full blur-2xl" />
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-amber-500/20 to-secondary/10 rounded-full blur-2xl" />
             <div className="relative">
               <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-5 h-5 text-secondary" />
-                <span className="font-medium text-foreground">H2H Inner Lab</span>
+                <Sparkles className="w-5 h-5 text-amber-400" />
+                <span className="font-medium text-foreground">The Oracle</span>
+                <span className="ml-auto text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-medium">
+                  BETA
+                </span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Full access to all Inner Lab features including AI mentorship, Bio-analysis, and Shadow reports.
+                Full access to all FlowOS features during the beta period. Explore everything the platform offers.
               </p>
-              <div className="text-2xl font-display font-bold text-secondary mb-1">
-                $99<span className="text-sm font-normal text-muted-foreground">/month</span>
+              <div className="text-2xl font-display font-bold text-amber-400 mb-1">
+                €14.99<span className="text-sm font-normal text-muted-foreground">/month</span>
               </div>
-              <p className="text-xs text-muted-foreground">Renews Jan 15, 2026</p>
+              <p className="text-xs text-muted-foreground mb-4">Currently free during beta</p>
+              
+              <Button 
+                variant="outline" 
+                className="w-full border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                onClick={() => setShowSubscriptionModal(true)}
+              >
+                <Crown className="w-4 h-4 mr-2" />
+                View All Plans
+              </Button>
               
               {/* H2H Branding */}
               <div className="mt-4 pt-4 border-t border-border/50 flex items-center gap-2">
@@ -533,6 +547,13 @@ export const ProfileTab = ({ userProfile, userId, avatarUrl, onNavigateToArchety
               }}
             />
           )}
+
+          {/* Subscription Modal */}
+          <SubscriptionModal 
+            open={showSubscriptionModal} 
+            onOpenChange={setShowSubscriptionModal}
+            currentTier="oracle"
+          />
         </div>
       </div>
     </div>

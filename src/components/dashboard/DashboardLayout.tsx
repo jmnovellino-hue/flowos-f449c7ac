@@ -8,13 +8,15 @@ import {
   MessageCircle, 
   User,
   Menu,
-  X
+  X,
+  Crown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import h2hLogo from '../../assets/h2h-logo-light.png';
 import { H2HFooter } from './H2HFooter';
-
+import { SubscriptionModal } from './SubscriptionModal';
 interface DashboardLayoutProps {
   children: ReactNode;
   activeTab: string;
@@ -43,7 +45,7 @@ const getInitials = (name: string) => {
 
 export const DashboardLayout = ({ children, activeTab, onTabChange, userName = 'Leader', avatarUrl }: DashboardLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   return (
     <div className="min-h-screen bg-background neural-grid flex flex-col">
       {/* Desktop Sidebar */}
@@ -104,14 +106,23 @@ export const DashboardLayout = ({ children, activeTab, onTabChange, userName = '
           </button>
           <div className="hidden lg:block glass-surface rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <span className="text-xs font-medium text-primary uppercase tracking-wider">
-                H2H Member
+              <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              <span className="text-xs font-medium text-secondary uppercase tracking-wider">
+                Beta Access
               </span>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Inner Lab Access
+            <p className="text-xs text-muted-foreground mb-3">
+              Full Oracle tier enabled
             </p>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="w-full text-xs gap-2 border-secondary/50 text-secondary hover:bg-secondary/10"
+              onClick={() => setShowSubscriptionModal(true)}
+            >
+              <Crown className="w-3 h-3" />
+              View Plans
+            </Button>
           </div>
         </div>
       </aside>
@@ -192,6 +203,13 @@ export const DashboardLayout = ({ children, activeTab, onTabChange, userName = '
           ))}
         </div>
       </nav>
+
+      {/* Subscription Modal */}
+      <SubscriptionModal 
+        open={showSubscriptionModal} 
+        onOpenChange={setShowSubscriptionModal}
+        currentTier="oracle"
+      />
     </div>
   );
 };
