@@ -11,3 +11,7 @@ verify_jwt = false
 [functions.architect-chat]
 enabled = true
 verify_jwt = false
+
+[functions.elevenlabs-scribe-token]
+enabled = true
+verify_jwt = false
