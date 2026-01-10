@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Sparkles, CheckCircle, XCircle, Brain, Target, Flame, Users } from "lucide-react";
 import logoDark from "@/assets/h2h-logo-dark.png";
+import { trackBetaEvent } from "@/lib/betaAnalytics";
 
 // Quiz questions designed to identify target users
 const quizQuestions = [
@@ -200,18 +201,30 @@ const BetaLanding = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ qualified: boolean; percentage: number } | null>(null);
 
+  // Track page view on mount
+  useEffect(() => {
+    trackBetaEvent('page_view');
+  }, []);
+
   const calculateMatchPercentage = () => {
     const totalPossibleScore = quizQuestions.length * 3;
     const actualScore = Object.values(answers).reduce((sum, score) => sum + score, 0);
     return Math.round((actualScore / totalPossibleScore) * 100);
   };
 
+  const handleStartQuiz = () => {
+    trackBetaEvent('quiz_started');
+    setStep('quiz');
+  };
+
   const handleAnswer = (questionId: number, score: number) => {
     setAnswers(prev => ({ ...prev, [questionId]: score }));
+    trackBetaEvent('quiz_question_answered', { questionNumber: currentQuestion + 1 });
     
     if (currentQuestion < quizQuestions.length - 1) {
       setTimeout(() => setCurrentQuestion(prev => prev + 1), 300);
     } else {
+      trackBetaEvent('quiz_completed');
       setStep('info');
     }
   };
@@ -251,6 +264,26 @@ const BetaLanding = () => {
         }
         setIsSubmitting(false);
         return;
+      }
+
+      // Track analytics and store email for tracking
+      localStorage.setItem('beta_email', userInfo.email.trim().toLowerCase());
+      trackBetaEvent('info_submitted', { email: userInfo.email, matchPercentage });
+      trackBetaEvent(qualified ? 'qualified' : 'not_qualified', { email: userInfo.email, matchPercentage });
+
+      // Send welcome or waitlist email
+      try {
+        await supabase.functions.invoke('beta-emails', {
+          body: {
+            type: qualified ? 'welcome' : 'not_qualified',
+            email: userInfo.email.trim().toLowerCase(),
+            name: userInfo.fullName.trim(),
+            matchPercentage,
+          },
+        });
+      } catch (emailError) {
+        console.error('Email sending failed:', emailError);
+        // Don't block the flow if email fails
       }
 
       setResult({ qualified, percentage: matchPercentage });
@@ -333,7 +366,7 @@ const BetaLanding = () => {
                 </div>
 
                 <Button 
-                  onClick={() => setStep('quiz')}
+                  onClick={handleStartQuiz}
                   size="lg"
                   className="h2h-gradient text-primary-foreground px-8 py-6 text-lg glow-turquoise"
                 >

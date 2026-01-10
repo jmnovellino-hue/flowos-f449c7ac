@@ -35,3 +35,7 @@ verify_jwt = false
 [functions.contact-us]
 enabled = true
 verify_jwt = false
+
+[functions.beta-emails]
+enabled = true
+verify_jwt = false
