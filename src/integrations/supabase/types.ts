@@ -14,7 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      commitment_logs: {
+        Row: {
+          commitment_id: string
+          created_at: string
+          id: string
+          log_date: string
+          mood_after: number | null
+          mood_before: number | null
+          notes: string | null
+          practiced: boolean
+          user_id: string
+        }
+        Insert: {
+          commitment_id: string
+          created_at?: string
+          id?: string
+          log_date?: string
+          mood_after?: number | null
+          mood_before?: number | null
+          notes?: string | null
+          practiced?: boolean
+          user_id: string
+        }
+        Update: {
+          commitment_id?: string
+          created_at?: string
+          id?: string
+          log_date?: string
+          mood_after?: number | null
+          mood_before?: number | null
+          notes?: string | null
+          practiced?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commitment_logs_commitment_id_fkey"
+            columns: ["commitment_id"]
+            isOneToOne: false
+            referencedRelation: "commitments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commitments: {
+        Row: {
+          behavior: string
+          belief: string
+          commitment: string
+          completed_at: string | null
+          completion_reflection: string | null
+          created_at: string
+          days_practiced: number | null
+          deadline: string
+          feeling: string
+          id: string
+          last_check_in: string | null
+          reminder_enabled: boolean | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          behavior: string
+          belief: string
+          commitment: string
+          completed_at?: string | null
+          completion_reflection?: string | null
+          created_at?: string
+          days_practiced?: number | null
+          deadline: string
+          feeling: string
+          id?: string
+          last_check_in?: string | null
+          reminder_enabled?: boolean | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          behavior?: string
+          belief?: string
+          commitment?: string
+          completed_at?: string | null
+          completion_reflection?: string | null
+          created_at?: string
+          days_practiced?: number | null
+          deadline?: string
+          feeling?: string
+          id?: string
+          last_check_in?: string | null
+          reminder_enabled?: boolean | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          archetype: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          streak: number | null
+          tier: string | null
+          updated_at: string
+          user_id: string
+          values: string[] | null
+        }
+        Insert: {
+          archetype?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          streak?: number | null
+          tier?: string | null
+          updated_at?: string
+          user_id: string
+          values?: string[] | null
+        }
+        Update: {
+          archetype?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          streak?: number | null
+          tier?: string | null
+          updated_at?: string
+          user_id?: string
+          values?: string[] | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
