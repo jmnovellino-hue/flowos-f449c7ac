@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { JourneyIntro } from '@/components/onboarding/JourneyIntro';
 import { AssessmentFlow } from '@/components/onboarding/AssessmentFlow';
@@ -16,12 +17,14 @@ import { initializeContentNotifications } from '@/lib/contentNotifications';
 import { useAuth } from '@/hooks/useAuth';
 import { useCommitments } from '@/hooks/useCommitments';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 type AppState = 'auth' | 'journey-intro' | 'assessment' | 'dashboard';
 
 const Index = () => {
   const { user, loading: authLoading } = useAuth();
   const { createCommitment, getActiveCommitments } = useCommitments();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [appState, setAppState] = useState<AppState>('auth');
   const [activeTab, setActiveTab] = useState('home');
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
@@ -38,6 +41,33 @@ const Index = () => {
     initializeReminders();
     initializeContentNotifications();
   }, []);
+
+  // Handle email verification from URL
+  useEffect(() => {
+    const verifyToken = searchParams.get('verify_email');
+    if (verifyToken) {
+      handleEmailVerification(verifyToken);
+    }
+  }, [searchParams]);
+
+  const handleEmailVerification = async (token: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-email', {
+        body: { token }
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Email verified successfully! You will now receive weekly digests.');
+      // Remove the token from URL
+      setSearchParams({});
+      // Navigate to profile to show verified status
+      setActiveTab('profile');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to verify email');
+      setSearchParams({});
+    }
+  };
 
   // Check if user has completed onboarding
   useEffect(() => {
@@ -135,7 +165,7 @@ const Index = () => {
   const renderDashboardContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab userProfile={userProfile} onNavigateToProfile={() => setActiveTab('profile')} />;
+        return <HomeTab userProfile={userProfile} userId={user?.id} onNavigateToProfile={() => setActiveTab('profile')} />;
       case 'codex':
         return <CodexTab />;
       case 'studio':
@@ -151,7 +181,7 @@ const Index = () => {
       case 'shadow-report':
         return <ShadowReportPage userProfile={userProfile} onBack={() => setActiveTab('profile')} />;
       default:
-        return <HomeTab userProfile={userProfile} onNavigateToProfile={() => setActiveTab('profile')} />;
+        return <HomeTab userProfile={userProfile} userId={user?.id} onNavigateToProfile={() => setActiveTab('profile')} />;
     }
   };
 

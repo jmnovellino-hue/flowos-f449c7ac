@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Brain, Zap, AlertCircle, ChevronDown, ChevronUp, TrendingUp, Info } from 'lucide-react';
+import { BookOpen, Brain, Zap, AlertCircle, ChevronDown, ChevronUp, TrendingUp, Info, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface JournalEntry {
   date: string;
@@ -10,6 +12,10 @@ interface JournalEntry {
   energy: number;
   labScore: number;
   experimentsCompleted: number;
+}
+
+interface JournalingSectionProps {
+  userId?: string;
 }
 
 const moodOptions = [
@@ -28,23 +34,125 @@ const energyLevels = [
   { value: 5, label: 'Peak', color: 'primary' },
 ];
 
-// Mock data for 7-day trend
-const mockWeekData: JournalEntry[] = [
-  { date: 'Mon', mood: 4, energy: 3, labScore: 72, experimentsCompleted: 2 },
-  { date: 'Tue', mood: 3, energy: 4, labScore: 78, experimentsCompleted: 1 },
-  { date: 'Wed', mood: 5, energy: 5, labScore: 85, experimentsCompleted: 3 },
-  { date: 'Thu', mood: 4, energy: 4, labScore: 80, experimentsCompleted: 2 },
-  { date: 'Fri', mood: 3, energy: 3, labScore: 68, experimentsCompleted: 1 },
-  { date: 'Sat', mood: 4, energy: 4, labScore: 75, experimentsCompleted: 2 },
-  { date: 'Sun', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 }, // Today - not logged yet
-];
-
-export const JournalingSection = () => {
+export const JournalingSection = ({ userId }: JournalingSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMood, setSelectedMood] = useState<number | null>(null);
   const [selectedEnergy, setSelectedEnergy] = useState<number | null>(null);
   const [thoughts, setThoughts] = useState('');
   const [concerns, setConcerns] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [weekData, setWeekData] = useState<JournalEntry[]>([]);
+  const [todayEntrySaved, setTodayEntrySaved] = useState(false);
+
+  useEffect(() => {
+    if (userId) {
+      loadWeekData();
+    }
+  }, [userId]);
+
+  const loadWeekData = async () => {
+    if (!userId) return;
+
+    const today = new Date();
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 6);
+
+    const { data: entries } = await supabase
+      .from('journal_entries')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('entry_date', weekAgo.toISOString().split('T')[0])
+      .order('entry_date', { ascending: true });
+
+    // Build week data from entries
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekEntries: JournalEntry[] = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dateStr = date.toISOString().split('T')[0];
+      const dayName = days[date.getDay()];
+      
+      const entry = entries?.find(e => e.entry_date === dateStr);
+      
+      if (entry) {
+        weekEntries.push({
+          date: dayName,
+          mood: entry.mood,
+          energy: entry.energy,
+          labScore: Math.round(((entry.mood + entry.energy) / 10) * 100),
+          experimentsCompleted: 0,
+        });
+        
+        // Check if today's entry exists
+        if (i === 0) {
+          setTodayEntrySaved(true);
+          setSelectedMood(entry.mood);
+          setSelectedEnergy(entry.energy);
+          setThoughts(entry.thoughts || '');
+          setConcerns(entry.concerns || '');
+        }
+      } else {
+        weekEntries.push({
+          date: dayName,
+          mood: 0,
+          energy: 0,
+          labScore: 0,
+          experimentsCompleted: 0,
+        });
+      }
+    }
+
+    setWeekData(weekEntries);
+  };
+
+  const saveEntry = async () => {
+    if (!userId || !selectedMood || !selectedEnergy) {
+      toast.error('Please select mood and energy level');
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { error } = await supabase
+        .from('journal_entries')
+        .upsert({
+          user_id: userId,
+          entry_date: today,
+          mood: selectedMood,
+          energy: selectedEnergy,
+          thoughts: thoughts || null,
+          concerns: concerns || null,
+        }, {
+          onConflict: 'user_id,entry_date'
+        });
+
+      if (error) throw error;
+
+      toast.success('Journal entry saved!');
+      setTodayEntrySaved(true);
+      loadWeekData();
+    } catch (error: any) {
+      console.error('Error saving journal entry:', error);
+      toast.error(error.message || 'Failed to save entry');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const displayWeekData = weekData.length > 0 ? weekData : [
+    { date: 'Mon', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 },
+    { date: 'Tue', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 },
+    { date: 'Wed', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 },
+    { date: 'Thu', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 },
+    { date: 'Fri', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 },
+    { date: 'Sat', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 },
+    { date: 'Sun', mood: 0, energy: 0, labScore: 0, experimentsCompleted: 0 },
+  ];
 
   const calculateOverallScore = (entry: JournalEntry) => {
     if (entry.mood === 0) return 0;
@@ -68,10 +176,10 @@ export const JournalingSection = () => {
     return 'text-destructive';
   };
 
-  const weekAverage = Math.round(
-    mockWeekData.filter(d => d.mood > 0).reduce((sum, d) => sum + calculateOverallScore(d), 0) / 
-    mockWeekData.filter(d => d.mood > 0).length
-  );
+  const filledDays = displayWeekData.filter(d => d.mood > 0);
+  const weekAverage = filledDays.length > 0 
+    ? Math.round(filledDays.reduce((sum, d) => sum + calculateOverallScore(d), 0) / filledDays.length)
+    : 0;
 
   return (
     <motion.div
@@ -211,9 +319,9 @@ export const JournalingSection = () => {
             </div>
             
             <div className="grid grid-cols-7 gap-2">
-              {mockWeekData.map((day, index) => {
+              {displayWeekData.map((day, index) => {
                 const score = calculateOverallScore(day);
-                const isToday = index === mockWeekData.length - 1;
+                const isToday = index === displayWeekData.length - 1;
                 return (
                   <div key={day.date} className="text-center">
                     <span className={`text-xs ${isToday ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
@@ -265,9 +373,19 @@ export const JournalingSection = () => {
 
           <Button 
             className="w-full bg-primary hover:bg-primary/90"
-            disabled={!selectedMood || !selectedEnergy}
+            disabled={!selectedMood || !selectedEnergy || isSaving}
+            onClick={saveEntry}
           >
-            Save Today's Entry
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : todayEntrySaved ? (
+              'Update Today\'s Entry'
+            ) : (
+              'Save Today\'s Entry'
+            )}
           </Button>
         </motion.div>
       )}

@@ -35,11 +35,12 @@ serve(async (req: Request): Promise<Response> => {
       }
     }
 
-    // Get users who should receive digest
+    // Get users who should receive digest (only verified emails)
     let query = supabase
       .from("profiles")
-      .select("user_id, display_name, email, archetype, weekly_digest_enabled, last_digest_sent_at")
+      .select("user_id, display_name, email, archetype, weekly_digest_enabled, last_digest_sent_at, email_verified")
       .eq("weekly_digest_enabled", true)
+      .eq("email_verified", true)
       .not("email", "is", null);
 
     if (targetUserId) {
