@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { Eye, Compass, Building2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import h2hLogo from '@/assets/h2h-logo-light.png';
+import h2hLogo from '../../assets/h2h-logo-light.png';
+
 interface JourneyIntroProps {
   onBegin: () => void;
 }

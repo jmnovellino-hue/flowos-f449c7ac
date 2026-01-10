@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NeuralBackground } from '@/components/ui/NeuralBackground';
 import { useAuth } from '@/hooks/useAuth';
-import h2hLogo from '@/assets/h2h-logo-light.png';
+import h2hLogo from '../../assets/h2h-logo-light.png';
+
 interface AuthScreenProps {
   onComplete: () => void;
 }
