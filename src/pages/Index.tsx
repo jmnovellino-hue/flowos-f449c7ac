@@ -240,7 +240,12 @@ const Index = () => {
   }
 
   return (
-    <DashboardLayout activeTab={activeTab} onTabChange={setActiveTab}>
+    <DashboardLayout 
+      activeTab={activeTab} 
+      onTabChange={setActiveTab}
+      userName={userProfile.name}
+      avatarUrl={avatarUrl}
+    >
       {renderDashboardContent()}
     </DashboardLayout>
   );

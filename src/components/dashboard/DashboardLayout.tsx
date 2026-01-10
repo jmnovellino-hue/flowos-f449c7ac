@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import h2hLogo from '../../assets/h2h-logo-light.png';
 import { H2HFooter } from './H2HFooter';
 
@@ -18,6 +19,8 @@ interface DashboardLayoutProps {
   children: ReactNode;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  userName?: string;
+  avatarUrl?: string | null;
 }
 
 const navItems = [
@@ -29,7 +32,16 @@ const navItems = [
   { id: 'profile', label: 'Profile', icon: User },
 ];
 
-export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardLayoutProps) => {
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+export const DashboardLayout = ({ children, activeTab, onTabChange, userName = 'Leader', avatarUrl }: DashboardLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -73,8 +85,23 @@ export const DashboardLayout = ({ children, activeTab, onTabChange }: DashboardL
           </ul>
         </nav>
 
-        {/* Tier Badge */}
+        {/* User Avatar & Tier Badge */}
         <div className="p-4 border-t border-sidebar-border">
+          <button
+            onClick={() => onTabChange('profile')}
+            className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-sidebar-accent transition-colors mb-3"
+          >
+            <Avatar className="w-10 h-10 border border-primary/20">
+              <AvatarImage src={avatarUrl || undefined} alt={userName} />
+              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-sm">
+                {getInitials(userName)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="hidden lg:block text-left flex-1 min-w-0">
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{userName}</p>
+              <p className="text-xs text-muted-foreground">View Profile</p>
+            </div>
+          </button>
           <div className="hidden lg:block glass-surface rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
