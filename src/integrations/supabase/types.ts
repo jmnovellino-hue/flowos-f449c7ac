@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       architect_conversations: {
         Row: {
           created_at: string
@@ -157,6 +175,54 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      beta_applications: {
+        Row: {
+          accessed_app: boolean
+          accessed_at: string | null
+          created_at: string
+          email: string
+          feedback_sent: boolean
+          feedback_sent_at: string | null
+          full_name: string
+          id: string
+          match_percentage: number
+          notes: string | null
+          qualified: boolean
+          quiz_responses: Json
+          updated_at: string
+        }
+        Insert: {
+          accessed_app?: boolean
+          accessed_at?: string | null
+          created_at?: string
+          email: string
+          feedback_sent?: boolean
+          feedback_sent_at?: string | null
+          full_name: string
+          id?: string
+          match_percentage: number
+          notes?: string | null
+          qualified?: boolean
+          quiz_responses: Json
+          updated_at?: string
+        }
+        Update: {
+          accessed_app?: boolean
+          accessed_at?: string | null
+          created_at?: string
+          email?: string
+          feedback_sent?: boolean
+          feedback_sent_at?: string | null
+          full_name?: string
+          id?: string
+          match_percentage?: number
+          notes?: string | null
+          qualified?: boolean
+          quiz_responses?: Json
+          updated_at?: string
         }
         Relationships: []
       }
