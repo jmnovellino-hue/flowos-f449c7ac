@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import { User, Shield, Crown, Heart, Brain, ChevronRight, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import h2hLogo from '@/assets/h2h-logo-light.png';
+import h2hLogo from '../../assets/h2h-logo-light.png';
+
 interface ProfileTabProps {
   userProfile: {
     name: string;

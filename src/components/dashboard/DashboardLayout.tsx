@@ -11,7 +11,7 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import h2hLogo from '@/assets/h2h-logo-light.png';
+import h2hLogo from '../../assets/h2h-logo-light.png';
 
 interface DashboardLayoutProps {
   children: ReactNode;
