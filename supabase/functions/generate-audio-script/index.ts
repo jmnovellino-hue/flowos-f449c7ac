@@ -40,33 +40,38 @@ serve(async (req) => {
     let userPrompt = "";
 
     if (config.type === 'meditation') {
-      const { backgroundSound, duration, decompress, grounding, selfAffirmation, manifestation, gratefulness } = config;
-      
-      const frequencyMap = {
-        nature: '432Hz binaural beats for natural balance and harmony',
-        elevate: '777Hz binaural beats for spiritual elevation and divine connection',
-        enlightenment: '1111Hz binaural beats for awakening and higher consciousness'
-      };
+      const { duration, decompress, grounding, selfAffirmation, manifestation, gratefulness } = config;
 
-      systemPrompt = `You are a calm, gentle meditation guide with a soothing voice. Create a guided meditation script that flows seamlessly. The meditation should be approximately ${duration} minutes long. Use a warm, peaceful, and reassuring tone throughout. Include natural pauses marked with [PAUSE] for moments of silence. The script should feel like one cohesive journey, not separate exercises.`;
+      systemPrompt = `You are writing a meditation script that will be read aloud by a text-to-speech system. 
 
-      userPrompt = `Create a ${duration}-minute guided meditation script with ${frequencyMap[backgroundSound]} playing in the background. Structure the meditation to include:
+CRITICAL RULES:
+1. Write ONLY the words to be spoken aloud - nothing else
+2. NO titles, headers, section labels, or descriptions
+3. NO markdown formatting (no ##, **, bullets, or numbers)
+4. NO stage directions except [pause] for silence moments
+5. NO meta-commentary like "This meditation is..." or "In this section..."
+6. Start speaking directly to the listener immediately
+7. Use ... (ellipsis) for natural breathing pauses
+8. Use [pause] only for longer 3-5 second silence moments
 
-1. Opening: A gentle welcome and invitation to settle into a comfortable position (30 seconds)
+The meditation should be approximately ${duration} minutes when read aloud at a slow, calm pace. 
 
-${decompress ? `2. Three-Breath Reset: Guide through 3 deep breaths with 4 seconds inhale, 4 seconds hold, 8 seconds exhale. Describe each breath with imagery of releasing tension and stress.` : ''}
+Write in second person ("you"), present tense, with warm and gentle language.`;
 
-${grounding ? `3. Grounding Exercise: Guide through a body-awareness grounding technique - feeling the weight of the body, connection to the earth, sensation of being fully present and supported.` : ''}
+      const sections = [];
+      sections.push("A gentle welcome inviting them to settle and close their eyes");
+      if (decompress) sections.push("Three deep breaths: 4 seconds inhale, 4 hold, 8 exhale - describe each with imagery of releasing tension");
+      if (grounding) sections.push("Body awareness grounding - feeling weight, connection to earth, being fully present");
+      if (selfAffirmation) sections.push(`3-5 affirmations about "${selfAffirmation}" in present tense for them to repeat silently`);
+      if (manifestation) sections.push("Visualization of their desired outcome as already achieved, engaging all senses");
+      if (gratefulness) sections.push("Gentle gratitude reflection for 3 aspects of their life");
+      sections.push("Gently returning awareness to the room and an empowering closing");
 
-${selfAffirmation ? `4. Self-Affirmation: Create 3-5 powerful affirmations about "${selfAffirmation}" for the listener to repeat internally. Frame them positively in present tense.` : ''}
+      userPrompt = `Write a ${duration}-minute guided meditation script. Include these elements flowing naturally together:
 
-${manifestation ? `5. Manifestation: Guide through a visualization exercise where the listener imagines their desired outcome as already achieved, engaging all senses.` : ''}
+${sections.join("\n")}
 
-${gratefulness ? `6. Gratefulness Practice: Lead a gentle gratitude reflection, inviting the listener to feel appreciation for 3 aspects of their life.` : ''}
-
-7. Closing: Gently bring awareness back to the present moment and close with an empowering statement.
-
-The script should flow naturally between sections without feeling segmented. Adjust the length of each section proportionally to fit the ${duration}-minute duration.`;
+Remember: Write ONLY the spoken words. No titles. No section headers. No formatting. Just the meditation narration that flows as one continuous, peaceful journey. Start immediately with "Welcome..." or "Gently..." - do not start with a title.`;
 
     } else if (config.type === 'performance') {
       const { situation } = config;

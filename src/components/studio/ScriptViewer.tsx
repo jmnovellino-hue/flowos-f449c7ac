@@ -11,6 +11,7 @@ interface ScriptViewerProps {
   title: string;
   category: 'meditation' | 'performance';
   config?: Record<string, unknown>;
+  backgroundFrequency?: 'nature' | 'elevate' | 'enlightenment';
   onClose: () => void;
   onSave?: (title: string, script: string, category: 'meditation' | 'performance', config?: Record<string, unknown>) => Promise<{ id: string } | null>;
   savedScriptId?: string;
@@ -24,6 +25,7 @@ export const ScriptViewer = ({
   title, 
   category,
   config,
+  backgroundFrequency,
   onClose, 
   onSave,
   savedScriptId,
@@ -146,7 +148,7 @@ export const ScriptViewer = ({
         {/* Audio Player or Generate Button */}
         {audioUrl ? (
           <div className="mb-4">
-            <AudioPlayer audioUrl={audioUrl} title={title} autoPlay />
+            <AudioPlayer audioUrl={audioUrl} title={title} autoPlay backgroundFrequency={backgroundFrequency} />
           </div>
         ) : (
           <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20">

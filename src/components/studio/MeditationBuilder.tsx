@@ -43,7 +43,7 @@ const affirmationTypes = [
 ];
 
 interface MeditationBuilderProps {
-  onComplete: (script: string) => void;
+  onComplete: (script: string, backgroundFrequency: 'nature' | 'elevate' | 'enlightenment') => void;
   onCancel: () => void;
 }
 
@@ -105,7 +105,7 @@ export const MeditationBuilder = ({ onComplete, onCancel }: MeditationBuilderPro
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
-      onComplete(data.script);
+      onComplete(data.script, config.backgroundSound as 'nature' | 'elevate' | 'enlightenment');
       toast.success('Your meditation has been created!');
     } catch (error) {
       console.error('Error generating meditation:', error);
