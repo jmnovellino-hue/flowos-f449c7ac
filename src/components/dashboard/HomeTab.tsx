@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
-import { Flame, TrendingUp, Target, Quote, ChevronRight } from 'lucide-react';
+import { Flame, TrendingUp, Quote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { JournalingSection } from './JournalingSection';
 import { MicroExperimentsSection } from './MicroExperimentsSection';
+import { CommitmentTracker } from './CommitmentTracker';
 
 interface HomeTabProps {
   userProfile: {
@@ -77,40 +78,8 @@ export const HomeTab = ({ userProfile }: HomeTabProps) => {
             </div>
           </motion.div>
 
-          {/* Active Iceberg */}
-          {userProfile.iceberg && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="glass-surface rounded-2xl p-6 border-l-4 border-l-secondary"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-secondary" />
-                  <span className="font-medium text-foreground">Active Iceberg Commitment</span>
-                </div>
-                <Button variant="ghost" size="sm" className="text-primary">
-                  Update
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <span className="text-xs text-muted-foreground uppercase tracking-wider">Behavior</span>
-                  <p className="text-foreground">{userProfile.iceberg.behavior}</p>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground uppercase tracking-wider">Feeling</span>
-                  <p className="text-foreground">{userProfile.iceberg.feeling}</p>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground uppercase tracking-wider">Deep Belief</span>
-                  <p className="text-foreground">{userProfile.iceberg.belief}</p>
-                </div>
-              </div>
-            </motion.div>
-          )}
+          {/* Commitment Tracker */}
+          <CommitmentTracker expanded={false} />
 
           {/* Micro-Experiments */}
           <MicroExperimentsSection />

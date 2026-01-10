@@ -10,25 +10,24 @@ import { LabTab } from '@/components/dashboard/LabTab';
 import { ArchitectTab } from '@/components/dashboard/ArchitectTab';
 import { ProfileTab } from '@/components/dashboard/ProfileTab';
 import { initializeReminders } from '@/lib/notifications';
+import { useAuth } from '@/hooks/useAuth';
+import { useCommitments } from '@/hooks/useCommitments';
+import { supabase } from '@/integrations/supabase/client';
 
 type AppState = 'auth' | 'journey-intro' | 'assessment' | 'dashboard';
 
 const Index = () => {
+  const { user, loading: authLoading } = useAuth();
+  const { createCommitment, getActiveCommitments } = useCommitments();
   const [appState, setAppState] = useState<AppState>('auth');
   const [activeTab, setActiveTab] = useState('home');
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [userProfile, setUserProfile] = useState({
     name: 'Leader',
     archetype: 'The Hero',
     values: ['Integrity', 'Wisdom', 'Innovation'],
     tier: 'Architect',
     streak: 12,
-    iceberg: {
-      behavior: 'I constantly check emails during meetings',
-      feeling: 'A spike of anxiety that I am missing critical info',
-      belief: 'My value as a leader depends on being the most responsive person in the room',
-      commitment: '',
-      deadline: '',
-    },
   });
 
   // Initialize commitment reminders on app load
@@ -36,22 +35,97 @@ const Index = () => {
     initializeReminders();
   }, []);
 
+  // Check if user has completed onboarding
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      if (!user) {
+        setCheckingOnboarding(false);
+        return;
+      }
+
+      try {
+        // Check if user has a profile with archetype set
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (profile?.archetype) {
+          // User has completed onboarding
+          setUserProfile(prev => ({
+            ...prev,
+            name: profile.display_name || 'Leader',
+            archetype: profile.archetype,
+            values: profile.values || ['Integrity', 'Wisdom', 'Innovation'],
+            tier: profile.tier || 'Explorer',
+            streak: profile.streak || 0,
+          }));
+          setAppState('dashboard');
+        } else {
+          // User needs to complete onboarding
+          setAppState('journey-intro');
+        }
+      } catch (error) {
+        console.error('Error checking onboarding:', error);
+        setAppState('journey-intro');
+      } finally {
+        setCheckingOnboarding(false);
+      }
+    };
+
+    if (!authLoading && user) {
+      checkOnboarding();
+    } else if (!authLoading && !user) {
+      setCheckingOnboarding(false);
+    }
+  }, [user, authLoading]);
+
   const handleAuthComplete = () => {
-    setAppState('journey-intro');
+    // Auth state change will trigger the onboarding check
   };
 
   const handleJourneyBegin = () => {
     setAppState('assessment');
   };
 
-  const handleAssessmentComplete = (results: any) => {
-    setUserProfile((prev) => ({
-      ...prev,
-      archetype: results.archetype,
-      values: results.values,
-      iceberg: results.iceberg,
-    }));
-    setAppState('dashboard');
+  const handleAssessmentComplete = async (results: any) => {
+    if (!user) return;
+
+    try {
+      // Update profile with assessment results
+      await supabase
+        .from('profiles')
+        .update({
+          archetype: results.archetype,
+          values: results.values,
+        })
+        .eq('user_id', user.id);
+
+      // Create commitment if provided
+      if (results.iceberg.commitment && results.iceberg.deadline) {
+        await createCommitment({
+          behavior: results.iceberg.behavior,
+          feeling: results.iceberg.feeling,
+          belief: results.iceberg.belief,
+          commitment: results.iceberg.commitment,
+          deadline: results.iceberg.deadline,
+          reminder_enabled: true,
+        });
+      }
+
+      setUserProfile((prev) => ({
+        ...prev,
+        archetype: results.archetype,
+        values: results.values,
+      }));
+
+      setAppState('dashboard');
+    } catch (error) {
+      console.error('Error saving assessment:', error);
+      // Still proceed to dashboard
+      setAppState('dashboard');
+    }
   };
 
   const renderDashboardContent = () => {
@@ -73,8 +147,22 @@ const Index = () => {
     }
   };
 
+  // Show loading while checking auth or onboarding
+  if (authLoading || checkingOnboarding) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center glow-emerald mx-auto mb-4 animate-pulse">
+            <span className="text-primary-foreground text-xl">✦</span>
+          </div>
+          <p className="text-muted-foreground">Loading FlowOS...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Render based on app state
-  if (appState === 'auth') {
+  if (!user || appState === 'auth') {
     return <AuthScreen onComplete={handleAuthComplete} />;
   }
 
