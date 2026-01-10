@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ArrowLeft, Check, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, Sparkles, Bell, Calendar, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { 
+  requestNotificationPermission, 
+  saveCommitment, 
+  generateCommitmentId,
+  type IcebergCommitment 
+} from '@/lib/notifications';
 
 interface AssessmentFlowProps {
   onComplete: (results: AssessmentResults) => void;
@@ -24,6 +30,8 @@ interface AssessmentResults {
     behavior: string;
     feeling: string;
     belief: string;
+    commitment: string;
+    deadline: string;
   };
 }
 
@@ -277,7 +285,7 @@ const icebergPrompts = [
 ];
 
 export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
-  const [phase, setPhase] = useState<'archetype' | 'results' | 'compass' | 'values' | 'iceberg-intro' | 'iceberg'>('archetype');
+  const [phase, setPhase] = useState<'archetype' | 'results' | 'compass' | 'values' | 'iceberg-intro' | 'iceberg' | 'iceberg-commitment'>('archetype');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [archetypeAnswers, setArchetypeAnswers] = useState<Record<number, number>>({});
   const [compassAnswers, setCompassAnswers] = useState<Record<number, string[]>>({});
@@ -288,14 +296,20 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
     feeling: '',
     belief: '',
   });
+  const [commitmentData, setCommitmentData] = useState({
+    commitment: '',
+    deadline: '',
+    enableReminders: true,
+  });
 
-  const totalQuestions = archetypeQuestions.length + compassScenarios.length + 1 + 1 + 3; // +1 for value selection, +1 for iceberg intro, +3 for iceberg
+  const totalQuestions = archetypeQuestions.length + compassScenarios.length + 1 + 1 + 3 + 1; // +1 for value selection, +1 for iceberg intro, +3 for iceberg, +1 for commitment
   const currentProgress = 
     phase === 'archetype' ? currentQuestion :
     phase === 'compass' ? archetypeQuestions.length + currentQuestion :
     phase === 'values' ? archetypeQuestions.length + compassScenarios.length :
     phase === 'iceberg-intro' ? archetypeQuestions.length + compassScenarios.length + 1 :
-    archetypeQuestions.length + compassScenarios.length + 2 + currentQuestion;
+    phase === 'iceberg' ? archetypeQuestions.length + compassScenarios.length + 2 + currentQuestion :
+    archetypeQuestions.length + compassScenarios.length + 5;
 
   const calculateSuggestedCategories = () => {
     // Count value occurrences from compass answers
@@ -429,14 +443,42 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
     if (currentQuestion < 2) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      const results: AssessmentResults = {
-        archetype: primaryArchetype,
-        archetypeBreakdown,
-        values: selectedValues,
-        iceberg: icebergAnswers,
-      };
-      onComplete(results);
+      // Move to commitment phase after completing the 3 iceberg questions
+      setPhase('iceberg-commitment');
     }
+  };
+
+  const handleCommitmentComplete = async () => {
+    // Save commitment with notifications if enabled
+    if (commitmentData.enableReminders && commitmentData.deadline) {
+      const hasPermission = await requestNotificationPermission();
+      
+      if (hasPermission) {
+        const commitment: IcebergCommitment = {
+          id: generateCommitmentId(),
+          behavior: icebergAnswers.behavior,
+          feeling: icebergAnswers.feeling,
+          belief: icebergAnswers.belief,
+          commitment: commitmentData.commitment,
+          deadline: commitmentData.deadline,
+          createdAt: new Date().toISOString(),
+          reminderEnabled: true,
+        };
+        saveCommitment(commitment);
+      }
+    }
+
+    const results: AssessmentResults = {
+      archetype: primaryArchetype,
+      archetypeBreakdown,
+      values: selectedValues,
+      iceberg: {
+        ...icebergAnswers,
+        commitment: commitmentData.commitment,
+        deadline: commitmentData.deadline,
+      },
+    };
+    onComplete(results);
   };
 
   return (
@@ -450,7 +492,9 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
               {phase === 'results' && 'Your Archetype Results'}
               {phase === 'compass' && 'Phase 2: The Compass'}
               {phase === 'values' && 'Phase 3: Your Core Values'}
+              {phase === 'iceberg-intro' && 'Phase 4: The Iceberg'}
               {phase === 'iceberg' && 'Phase 4: The Iceberg'}
+              {phase === 'iceberg-commitment' && 'Phase 5: Your Commitment'}
             </span>
             <span className="text-sm text-primary font-medium">
               {Math.round((currentProgress / totalQuestions) * 100)}%
@@ -1112,8 +1156,8 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                   >
                     {currentQuestion === 2 ? (
                       <>
-                        Complete Assessment
-                        <Check className="w-4 h-4 ml-2" />
+                        Set Your Commitment
+                        <ArrowRight className="w-4 h-4 ml-2" />
                       </>
                     ) : (
                       <>
@@ -1121,6 +1165,187 @@ export const AssessmentFlow = ({ onComplete }: AssessmentFlowProps) => {
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </>
                     )}
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Iceberg Commitment Phase */}
+            {phase === 'iceberg-commitment' && (
+              <motion.div
+                key="iceberg-commitment"
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-6"
+              >
+                <div className="text-center mb-6">
+                  <span className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium mb-4">
+                    Final Step
+                  </span>
+                  <h2 className="text-2xl md:text-3xl font-display text-foreground mb-2">
+                    Seal Your Commitment
+                  </h2>
+                  <p className="text-muted-foreground max-w-lg mx-auto">
+                    Now that you've explored your iceberg, it's time to make a concrete commitment to change.
+                  </p>
+                </div>
+
+                {/* Summary of iceberg exploration */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="glass-surface rounded-2xl p-6"
+                >
+                  <h4 className="font-medium text-foreground mb-4 flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Your Iceberg Summary
+                  </h4>
+                  <div className="space-y-3 text-sm">
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <span className="text-muted-foreground">Behavior:</span>
+                      <p className="text-foreground mt-1">{icebergAnswers.behavior || 'Not specified'}</p>
+                    </div>
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <span className="text-muted-foreground">Feeling:</span>
+                      <p className="text-foreground mt-1">{icebergAnswers.feeling || 'Not specified'}</p>
+                    </div>
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <span className="text-muted-foreground">Deep Belief:</span>
+                      <p className="text-foreground mt-1">{icebergAnswers.belief || 'Not specified'}</p>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Commitment input */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="glass-surface rounded-2xl p-6"
+                >
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Target className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-foreground mb-1">What will you do differently?</h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Define a specific, actionable commitment. What new behavior will replace the old one?
+                      </p>
+                      <textarea
+                        value={commitmentData.commitment}
+                        onChange={(e) => setCommitmentData({ ...commitmentData, commitment: e.target.value })}
+                        placeholder="e.g., When I feel the urge to check emails in meetings, I will take a deep breath and remind myself that I am present and valuable regardless of response time..."
+                        className="w-full h-28 bg-muted/50 border border-border/50 rounded-xl p-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20 resize-none text-sm"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Deadline input */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="glass-surface rounded-2xl p-6"
+                >
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Calendar className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-foreground mb-1">When is your deadline?</h4>
+                      <p className="text-sm text-muted-foreground mb-3">
+                        Set a date by which you'll have fully integrated this new behavior. We recommend 21-30 days.
+                      </p>
+                      <input
+                        type="date"
+                        value={commitmentData.deadline}
+                        onChange={(e) => setCommitmentData({ ...commitmentData, deadline: e.target.value })}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full bg-muted/50 border border-border/50 rounded-xl p-4 text-foreground focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Reminder toggle */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="glass-surface rounded-2xl p-6"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Bell className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-foreground mb-1">Daily Reminders</h4>
+                          <p className="text-sm text-muted-foreground">
+                            Receive daily notifications about your commitment until your deadline.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setCommitmentData({ ...commitmentData, enableReminders: !commitmentData.enableReminders })}
+                          className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+                            commitmentData.enableReminders ? 'bg-primary' : 'bg-muted'
+                          }`}
+                        >
+                          <div
+                            className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                              commitmentData.enableReminders ? 'translate-x-7' : 'translate-x-1'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                      {commitmentData.enableReminders && (
+                        <p className="text-xs text-primary mt-2">
+                          ✓ You'll receive browser notifications to help you stay on track
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Why commitments work */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="bg-muted/20 rounded-xl p-4 border border-border/30"
+                >
+                  <h5 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Why This Works</h5>
+                  <p className="text-sm text-foreground/80 leading-relaxed">
+                    Research shows that writing down commitments increases follow-through by 42%, and daily reminders 
+                    help rewire neural pathways over 21+ days. You're not just making a promise — you're reprogramming your brain.
+                  </p>
+                </motion.div>
+
+                <div className="flex justify-between items-center pt-4">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setPhase('iceberg');
+                      setCurrentQuestion(2);
+                    }}
+                    className="text-muted-foreground"
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleCommitmentComplete}
+                    disabled={!commitmentData.commitment.trim() || !commitmentData.deadline}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground glow-emerald px-8"
+                  >
+                    Complete Assessment
+                    <Check className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
               </motion.div>
