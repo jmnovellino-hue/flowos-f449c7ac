@@ -37,7 +37,7 @@ export const H2HFooter = () => {
           {/* Social Links */}
           <div className="flex items-center gap-4">
             <a 
-              href="https://www.linkedin.com/company/the-h2h-experiment" 
+              href="https://www.linkedin.com/company/the-h2h-experiment/?viewAsMember=true" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -46,7 +46,7 @@ export const H2HFooter = () => {
               <LinkedInIcon />
             </a>
             <a 
-              href="https://www.facebook.com/theh2hexperiment" 
+              href="https://www.facebook.com/profile.php?id=61581744042917" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -55,7 +55,7 @@ export const H2HFooter = () => {
               <FacebookIcon />
             </a>
             <a 
-              href="https://www.instagram.com/theh2hexperiment" 
+              href="https://www.instagram.com/joaopereira.h2he/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
