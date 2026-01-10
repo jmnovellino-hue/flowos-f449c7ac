@@ -1,1 +1,5 @@
 project_id = "fjiwlffbtijxzhreqrst"
+
+[functions.generate-audio-script]
+enabled = true
+verify_jwt = false
