@@ -1,153 +1,165 @@
-import { motion } from 'framer-motion';
-import { Play, Pause, Headphones, Clock, Lock, Mic, Volume2, Moon, Brain, Heart } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, Headphones, Clock, Lock, Brain, Moon, Zap, Volume2, Sparkles, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { MeditationBuilder } from '@/components/studio/MeditationBuilder';
+import { PerformanceBuilder } from '@/components/studio/PerformanceBuilder';
+import { ScriptViewer } from '@/components/studio/ScriptViewer';
 
 interface AudioCategory {
   id: string;
   label: string;
   description: string;
+  icon: typeof Brain;
+  hasAiBuilder: boolean;
 }
 
 const audioCategories: AudioCategory[] = [
-  { id: 'all', label: 'All', description: '' },
-  { id: 'podcast', label: 'Podcast', description: 'Deep-dive episodes on leadership psychology, philosophy, and self-mastery.' },
-  { id: 'prime', label: 'Peak Performance Primer', description: 'Short sessions to prime your mindset before critical moments—meetings, negotiations, or difficult conversations.' },
-  { id: 'decompress', label: 'Decompression', description: 'Guided sessions to transition out of work mode and release the day\'s tension.' },
-  { id: 'meditation', label: 'Meditation', description: 'Focused mindfulness practices to build presence, clarity, and emotional regulation.' },
-  { id: 'sleep', label: 'Sleep Better', description: 'Wind-down audio to prepare your nervous system for deep, restorative sleep.' },
+  { 
+    id: 'meditation', 
+    label: 'Meditation', 
+    description: 'Craft a personalized guided meditation tailored to your intentions—choose breathing, grounding, affirmations, manifestation, or gratitude to build your practice.',
+    icon: Brain,
+    hasAiBuilder: true,
+  },
+  { 
+    id: 'sleep', 
+    label: 'Sleep Better', 
+    description: 'Wind down with frequency-tuned audio designed to calm your nervous system and prepare you for deep, restorative rest.',
+    icon: Moon,
+    hasAiBuilder: false,
+  },
+  { 
+    id: 'performance', 
+    label: 'Peak Performance Primer', 
+    description: 'Get mentally primed for high-stakes moments—receive wisdom, reframes, and grounding techniques tailored to the challenge you\'re about to face.',
+    icon: Zap,
+    hasAiBuilder: true,
+  },
 ];
 
-const audioContent = [
+// Sleep frequency options
+const sleepContent = [
   {
-    id: 1,
-    title: 'Before the Board Meeting',
-    category: 'prime',
-    duration: '4:32',
-    description: 'Neuro-prime your state for high-stakes boardroom presence.',
+    id: 'sleep-delta',
+    title: 'Delta Waves',
+    frequency: '0.5-4Hz',
+    duration: '60:00',
+    description: 'Deep sleep frequencies for maximum restoration and physical recovery.',
     locked: false,
-    featured: true,
   },
   {
-    id: 2,
-    title: 'The Shadow Integration',
-    category: 'podcast',
-    duration: '28:45',
-    description: 'Deep dive into Jungian shadow work for modern leaders.',
+    id: 'sleep-theta',
+    title: 'Theta Relaxation',
+    frequency: '4-8Hz',
+    duration: '45:00',
+    description: 'Light sleep and deep relaxation frequencies for drifting off peacefully.',
     locked: false,
-    featured: false,
   },
   {
-    id: 3,
-    title: 'Work-to-Home Transition',
-    category: 'decompress',
-    duration: '8:15',
-    description: 'Guided meditation to shift from executive mode to family mode.',
+    id: 'sleep-schumann',
+    title: 'Schumann Resonance',
+    frequency: '7.83Hz',
+    duration: '60:00',
+    description: 'Earth\'s natural frequency for grounding and harmonizing your sleep cycle.',
     locked: false,
-    featured: false,
   },
   {
-    id: 4,
-    title: 'Before Firing Someone',
-    category: 'prime',
-    duration: '5:22',
-    description: 'Mental preparation for the hardest conversations.',
+    id: 'sleep-432',
+    title: 'Harmonic Sleep',
+    frequency: '432Hz',
+    duration: '45:00',
+    description: 'Natural tuning frequency for calming the mind and reducing anxiety before sleep.',
     locked: true,
-    featured: false,
   },
   {
-    id: 5,
-    title: 'Stoic Resilience Training',
-    category: 'podcast',
-    duration: '35:10',
-    description: 'Ancient wisdom for modern leadership challenges.',
+    id: 'sleep-528',
+    title: 'Healing Sleep',
+    frequency: '528Hz',
+    duration: '60:00',
+    description: 'The "love frequency" associated with DNA repair and deep cellular healing during rest.',
     locked: true,
-    featured: false,
   },
+];
+
+// Pre-made meditation content
+const meditationContent = [
   {
-    id: 6,
-    title: 'Salary Negotiation Prep',
-    category: 'prime',
-    duration: '6:45',
-    description: 'Center yourself before crucial compensation discussions.',
-    locked: false,
-    featured: false,
-  },
-  {
-    id: 7,
+    id: 'med-morning',
     title: 'Morning Clarity',
-    category: 'meditation',
     duration: '12:00',
     description: 'Start your day with intention and focused awareness.',
     locked: false,
-    featured: false,
   },
   {
-    id: 8,
+    id: 'med-breath',
     title: 'Breath of Calm',
-    category: 'meditation',
     duration: '7:30',
     description: 'Quick reset meditation for high-pressure moments.',
     locked: false,
-    featured: false,
   },
   {
-    id: 9,
+    id: 'med-body',
     title: 'Body Scan for Leaders',
-    category: 'meditation',
     duration: '15:00',
     description: 'Release tension and reconnect with physical awareness.',
     locked: true,
-    featured: false,
-  },
-  {
-    id: 10,
-    title: 'Sleep Preparation Ritual',
-    category: 'sleep',
-    duration: '20:00',
-    description: 'Progressive relaxation to prepare mind and body for deep rest.',
-    locked: false,
-    featured: false,
-  },
-  {
-    id: 11,
-    title: 'Letting Go of the Day',
-    category: 'sleep',
-    duration: '18:30',
-    description: 'Guided imagery to process and release the day\'s events.',
-    locked: false,
-    featured: false,
-  },
-  {
-    id: 12,
-    title: 'Deep Sleep Soundscape',
-    category: 'sleep',
-    duration: '45:00',
-    description: 'Ambient audio designed to enhance sleep quality and recovery.',
-    locked: true,
-    featured: false,
   },
 ];
 
-const getCategoryIcon = (category: string) => {
-  switch (category) {
-    case 'podcast': return Mic;
-    case 'meditation': return Brain;
-    case 'sleep': return Moon;
-    case 'decompress': return Heart;
-    default: return Headphones;
-  }
-};
+// Pre-made performance content
+const performanceContent = [
+  {
+    id: 'perf-board',
+    title: 'Before the Board Meeting',
+    duration: '4:32',
+    description: 'Neuro-prime your state for high-stakes boardroom presence.',
+    locked: false,
+  },
+  {
+    id: 'perf-convo',
+    title: 'Difficult Conversations',
+    duration: '5:22',
+    description: 'Mental preparation for the hardest conversations.',
+    locked: false,
+  },
+  {
+    id: 'perf-negotiate',
+    title: 'Negotiation Mindset',
+    duration: '6:45',
+    description: 'Center yourself before crucial discussions.',
+    locked: true,
+  },
+];
 
 export const StudioTab = () => {
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [playing, setPlaying] = useState<number | null>(null);
-
-  const filteredContent = activeCategory === 'all' 
-    ? audioContent 
-    : audioContent.filter(a => a.category === activeCategory);
+  const [activeCategory, setActiveCategory] = useState<string>('meditation');
+  const [playing, setPlaying] = useState<string | null>(null);
+  const [showMeditationBuilder, setShowMeditationBuilder] = useState(false);
+  const [showPerformanceBuilder, setShowPerformanceBuilder] = useState(false);
+  const [generatedScript, setGeneratedScript] = useState<{ script: string; title: string } | null>(null);
 
   const activeCategoryData = audioCategories.find(c => c.id === activeCategory);
+  const CategoryIcon = activeCategoryData?.icon || Headphones;
+
+  const getContentForCategory = () => {
+    switch (activeCategory) {
+      case 'meditation': return meditationContent;
+      case 'sleep': return sleepContent;
+      case 'performance': return performanceContent;
+      default: return [];
+    }
+  };
+
+  const handleMeditationComplete = (script: string) => {
+    setShowMeditationBuilder(false);
+    setGeneratedScript({ script, title: 'Custom Meditation' });
+  };
+
+  const handlePerformanceComplete = (script: string, situation: string) => {
+    setShowPerformanceBuilder(false);
+    setGeneratedScript({ script, title: `Primer: ${situation}` });
+  };
 
   return (
     <div className="p-6 lg:p-10 max-w-6xl mx-auto pb-24 md:pb-10">
@@ -161,7 +173,7 @@ export const StudioTab = () => {
           The Studio
         </h1>
         <p className="text-lg text-muted-foreground">
-          Audio for the liminal spaces of your day.
+          AI-powered audio for the liminal spaces of your day.
         </p>
       </motion.div>
 
@@ -178,37 +190,23 @@ export const StudioTab = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-primary font-medium uppercase tracking-wider mb-1">Now Playing</p>
-            <h3 className="text-lg font-semibold text-foreground truncate">Before the Board Meeting</h3>
-            <p className="text-sm text-muted-foreground">Peak Performance Primer • 4:32</p>
+            <h3 className="text-lg font-semibold text-foreground truncate">Select an audio to play</h3>
+            <p className="text-sm text-muted-foreground">Choose from the categories below</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2">
               <Volume2 className="w-4 h-4 text-muted-foreground" />
               <div className="w-24 h-1 bg-muted rounded-full">
-                <div className="w-3/4 h-full bg-primary rounded-full" />
+                <div className="w-0 h-full bg-primary rounded-full" />
               </div>
             </div>
             <Button
               size="icon"
-              className="w-12 h-12 rounded-full bg-primary hover:bg-primary/90 glow-emerald"
-              onClick={() => setPlaying(playing === 1 ? null : 1)}
+              className="w-12 h-12 rounded-full bg-muted hover:bg-muted/80"
+              disabled
             >
-              {playing === 1 ? (
-                <Pause className="w-5 h-5 text-primary-foreground" />
-              ) : (
-                <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
-              )}
+              <Play className="w-5 h-5 text-muted-foreground ml-0.5" />
             </Button>
-          </div>
-        </div>
-        {/* Progress bar */}
-        <div className="mt-4">
-          <div className="h-1 bg-muted rounded-full">
-            <div className="w-1/3 h-full bg-gradient-to-r from-primary to-accent rounded-full" />
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground mt-2">
-            <span>1:28</span>
-            <span>4:32</span>
           </div>
         </div>
       </motion.div>
@@ -221,41 +219,61 @@ export const StudioTab = () => {
         className="mb-8"
       >
         <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none">
-          {audioCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                activeCategory === cat.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+          {audioCategories.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
+                  activeCategory === cat.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Category Description */}
         {activeCategoryData?.description && (
-          <motion.p
+          <motion.div
             key={activeCategory}
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-sm text-muted-foreground bg-muted/30 rounded-lg p-3 mt-2"
+            className="bg-muted/30 rounded-lg p-4 mt-2"
           >
-            {activeCategoryData.description}
-          </motion.p>
+            <p className="text-sm text-muted-foreground mb-3">
+              {activeCategoryData.description}
+            </p>
+            {activeCategoryData.hasAiBuilder && (
+              <Button
+                onClick={() => {
+                  if (activeCategory === 'meditation') setShowMeditationBuilder(true);
+                  if (activeCategory === 'performance') setShowPerformanceBuilder(true);
+                }}
+                className="gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                Create Custom {activeCategory === 'meditation' ? 'Meditation' : 'Primer'}
+              </Button>
+            )}
+          </motion.div>
         )}
       </motion.div>
 
       {/* Audio Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {filteredContent.map((audio, index) => {
-          const CategoryIcon = getCategoryIcon(audio.category);
-          const categoryLabel = audioCategories.find(c => c.id === audio.category)?.label;
-
-          return (
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+          <CategoryIcon className="w-4 h-4" />
+          {activeCategory === 'sleep' ? 'Frequency Library' : 'Ready-Made Sessions'}
+        </h3>
+        
+        <div className="grid gap-4 md:grid-cols-2">
+          {getContentForCategory().map((audio, index) => (
             <motion.div
               key={audio.id}
               initial={{ opacity: 0, y: 20 }}
@@ -279,12 +297,9 @@ export const StudioTab = () => {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-medium text-primary uppercase tracking-wider">
-                    {categoryLabel}
-                  </span>
-                  {audio.featured && (
-                    <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs">
-                      Featured
+                  {'frequency' in audio && typeof audio.frequency === 'string' && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+                      {audio.frequency}
                     </span>
                   )}
                 </div>
@@ -317,9 +332,30 @@ export const StudioTab = () => {
                 )}
               </div>
             </motion.div>
-          );
-        })}
+          ))}
+        </div>
       </div>
+
+      {/* Modals */}
+      {showMeditationBuilder && (
+        <MeditationBuilder
+          onComplete={handleMeditationComplete}
+          onCancel={() => setShowMeditationBuilder(false)}
+        />
+      )}
+      {showPerformanceBuilder && (
+        <PerformanceBuilder
+          onComplete={handlePerformanceComplete}
+          onCancel={() => setShowPerformanceBuilder(false)}
+        />
+      )}
+      {generatedScript && (
+        <ScriptViewer
+          script={generatedScript.script}
+          title={generatedScript.title}
+          onClose={() => setGeneratedScript(null)}
+        />
+      )}
     </div>
   );
 };
