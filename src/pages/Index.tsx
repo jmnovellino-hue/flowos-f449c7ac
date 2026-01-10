@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { JourneyIntro } from '@/components/onboarding/JourneyIntro';
 import { AssessmentFlow } from '@/components/onboarding/AssessmentFlow';
@@ -9,6 +9,7 @@ import { StudioTab } from '@/components/dashboard/StudioTab';
 import { LabTab } from '@/components/dashboard/LabTab';
 import { ArchitectTab } from '@/components/dashboard/ArchitectTab';
 import { ProfileTab } from '@/components/dashboard/ProfileTab';
+import { initializeReminders } from '@/lib/notifications';
 
 type AppState = 'auth' | 'journey-intro' | 'assessment' | 'dashboard';
 
@@ -25,8 +26,15 @@ const Index = () => {
       behavior: 'I constantly check emails during meetings',
       feeling: 'A spike of anxiety that I am missing critical info',
       belief: 'My value as a leader depends on being the most responsive person in the room',
+      commitment: '',
+      deadline: '',
     },
   });
+
+  // Initialize commitment reminders on app load
+  useEffect(() => {
+    initializeReminders();
+  }, []);
 
   const handleAuthComplete = () => {
     setAppState('journey-intro');
