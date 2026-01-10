@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { X, Download, FileText } from "lucide-react";
+import { trackBetaEvent } from "@/lib/betaAnalytics";
 
 interface ProductSpecsDocumentProps {
   onClose: () => void;
@@ -9,6 +10,8 @@ interface ProductSpecsDocumentProps {
 
 const ProductSpecsDocument = ({ onClose }: ProductSpecsDocumentProps) => {
   const handleDownload = () => {
+    trackBetaEvent('specs_downloaded');
+    
     // Create the document content
     const content = generateSpecsContent();
     const blob = new Blob([content], { type: 'text/markdown' });

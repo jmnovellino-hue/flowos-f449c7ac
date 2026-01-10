@@ -111,6 +111,42 @@ const BetaAdmin = () => {
     }
   };
 
+  const sendFeedbackEmail = async (app: BetaApplication) => {
+    try {
+      const { error } = await supabase.functions.invoke('beta-emails', {
+        body: {
+          type: 'feedback_request',
+          email: app.email,
+          name: app.full_name,
+        },
+      });
+
+      if (error) throw error;
+
+      // Mark as feedback sent
+      await supabase
+        .from('beta_applications')
+        .update({ 
+          feedback_sent: true, 
+          feedback_sent_at: new Date().toISOString() 
+        })
+        .eq('id', app.id);
+      
+      setApplications(prev => 
+        prev.map(a => a.id === app.id ? { 
+          ...a, 
+          feedback_sent: true, 
+          feedback_sent_at: new Date().toISOString() 
+        } : a)
+      );
+      
+      toast.success(`Feedback request sent to ${app.email}`);
+    } catch (error) {
+      console.error('Error sending feedback email:', error);
+      toast.error("Failed to send email");
+    }
+  };
+
   const markFeedbackSent = async (appId: string) => {
     try {
       const { error } = await supabase
@@ -355,7 +391,8 @@ const BetaAdmin = () => {
                             <Button 
                               variant="ghost" 
                               size="sm"
-                              onClick={() => markFeedbackSent(app.id)}
+                              onClick={() => sendFeedbackEmail(app)}
+                              title="Send feedback request email"
                             >
                               <MessageSquare className="w-4 h-4" />
                             </Button>
