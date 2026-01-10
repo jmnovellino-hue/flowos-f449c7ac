@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Pause, Headphones, Clock, Lock, Brain, Moon, Zap, Volume2, Sparkles, Heart } from 'lucide-react';
+import { Play, Pause, Headphones, Clock, Lock, Brain, Moon, Zap, Volume2, Sparkles, Heart, Podcast, ExternalLink, Bell } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MeditationBuilder } from '@/components/studio/MeditationBuilder';
@@ -36,6 +36,13 @@ const audioCategories: AudioCategory[] = [
     description: 'Get mentally primed for high-stakes moments—receive wisdom, reframes, and grounding techniques tailored to the challenge you\'re about to face.',
     icon: Zap,
     hasAiBuilder: true,
+  },
+  { 
+    id: 'podcast', 
+    label: 'H2H Podcast', 
+    description: 'Listen to The H2H Experiment podcast—deep conversations on leadership, performance psychology, and human transformation.',
+    icon: Podcast,
+    hasAiBuilder: false,
   },
 ];
 
@@ -133,6 +140,24 @@ const performanceContent = [
   },
 ];
 
+// Podcast episodes
+const podcastEpisodes = [
+  {
+    id: 'ep-latest',
+    title: 'Latest Episode',
+    description: 'Listen to the newest episode of The H2H Experiment podcast.',
+    isLatest: true,
+  },
+  {
+    id: 'ep-all',
+    title: 'All Episodes',
+    description: 'Browse and listen to the full podcast archive on Spotify.',
+    isLatest: false,
+  },
+];
+
+const SPOTIFY_PODCAST_URL = 'https://open.spotify.com/show/2ETfRLDqlvv2kfH6y8vs69?si=34acb65b2294464c';
+
 export const StudioTab = () => {
   const [activeCategory, setActiveCategory] = useState<string>('meditation');
   const [playing, setPlaying] = useState<string | null>(null);
@@ -156,7 +181,7 @@ export const StudioTab = () => {
   };
 
   const getSavedScriptsForCategory = () => {
-    if (activeCategory === 'sleep') return [];
+    if (activeCategory === 'sleep' || activeCategory === 'podcast') return [];
     return scripts.filter(s => s.category === activeCategory);
   };
 
@@ -172,6 +197,10 @@ export const StudioTab = () => {
 
   const handleSaveScript = async (title: string, script: string, category: 'meditation' | 'performance') => {
     return await saveScript(title, script, category);
+  };
+
+  const openSpotifyPodcast = () => {
+    window.open(SPOTIFY_PODCAST_URL, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -274,12 +303,111 @@ export const StudioTab = () => {
                 Create Custom {activeCategory === 'meditation' ? 'Meditation' : 'Primer'}
               </Button>
             )}
+            {activeCategory === 'podcast' && (
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={openSpotifyPodcast}
+                  className="gap-2"
+                >
+                  <Podcast className="w-4 h-4" />
+                  Open on Spotify
+                  <ExternalLink className="w-3 h-3" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    // This could be enhanced with push notifications
+                    window.open(SPOTIFY_PODCAST_URL, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="gap-2"
+                >
+                  <Bell className="w-4 h-4" />
+                  Follow for Updates
+                </Button>
+              </div>
+            )}
           </motion.div>
         )}
       </motion.div>
 
+      {/* Podcast Section */}
+      {activeCategory === 'podcast' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-6"
+        >
+          {/* Spotify Embed */}
+          <div className="glass-surface rounded-2xl p-6 overflow-hidden">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2 mb-4">
+              <Podcast className="w-4 h-4 text-primary" />
+              The H2H Experiment Podcast
+            </h3>
+            <div className="rounded-xl overflow-hidden">
+              <iframe 
+                style={{ borderRadius: '12px' }}
+                src="https://open.spotify.com/embed/show/2ETfRLDqlvv2kfH6y8vs69?utm_source=generator&theme=0" 
+                width="100%" 
+                height="352" 
+                frameBorder="0" 
+                allowFullScreen 
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                loading="lazy"
+                className="bg-background"
+              />
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="glass-surface rounded-xl p-5 flex items-start gap-4 group hover:border-primary/30 transition-all cursor-pointer"
+              onClick={openSpotifyPodcast}
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500/20 to-green-600/10 flex items-center justify-center flex-shrink-0">
+                <Podcast className="w-5 h-5 text-green-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                  Listen on Spotify
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Access the full podcast library and subscribe for new episodes.
+                </p>
+              </div>
+              <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="glass-surface rounded-xl p-5 flex items-start gap-4 group hover:border-primary/30 transition-all cursor-pointer"
+              onClick={() => window.open('https://theh2hexperiment.com/our-podcast', '_blank', 'noopener,noreferrer')}
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center flex-shrink-0">
+                <ExternalLink className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                  Visit Podcast Website
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Show notes, resources, and additional content for each episode.
+                </p>
+              </div>
+              <ExternalLink className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Favorites Section */}
-      {favorites.length > 0 && (
+      {favorites.length > 0 && activeCategory !== 'podcast' && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -364,76 +492,78 @@ export const StudioTab = () => {
         </motion.div>
       )}
 
-      {/* Audio Grid */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-          <CategoryIcon className="w-4 h-4" />
-          {activeCategory === 'sleep' ? 'Frequency Library' : 'Ready-Made Sessions'}
-        </h3>
-        
-        <div className="grid gap-4 md:grid-cols-2">
-          {getContentForCategory().map((audio, index) => (
-            <motion.div
-              key={audio.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + index * 0.05 }}
-              className={`glass-surface rounded-xl p-5 flex items-start gap-4 group hover:border-primary/30 transition-all ${
-                audio.locked ? 'opacity-70' : ''
-              }`}
-            >
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                audio.locked 
-                  ? 'bg-muted' 
-                  : 'bg-gradient-to-br from-primary/20 to-accent/10 group-hover:from-primary/30 group-hover:to-accent/20'
-              }`}>
-                {audio.locked ? (
-                  <Lock className="w-5 h-5 text-muted-foreground" />
-                ) : (
-                  <CategoryIcon className="w-5 h-5 text-primary" />
-                )}
-              </div>
-              
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  {'frequency' in audio && typeof audio.frequency === 'string' && (
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
-                      {audio.frequency}
-                    </span>
+      {/* Audio Grid - Only show for non-podcast categories */}
+      {activeCategory !== 'podcast' && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+            <CategoryIcon className="w-4 h-4" />
+            {activeCategory === 'sleep' ? 'Frequency Library' : 'Ready-Made Sessions'}
+          </h3>
+          
+          <div className="grid gap-4 md:grid-cols-2">
+            {getContentForCategory().map((audio, index) => (
+              <motion.div
+                key={audio.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 + index * 0.05 }}
+                className={`glass-surface rounded-xl p-5 flex items-start gap-4 group hover:border-primary/30 transition-all ${
+                  audio.locked ? 'opacity-70' : ''
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  audio.locked 
+                    ? 'bg-muted' 
+                    : 'bg-gradient-to-br from-primary/20 to-accent/10 group-hover:from-primary/30 group-hover:to-accent/20'
+                }`}>
+                  {audio.locked ? (
+                    <Lock className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <CategoryIcon className="w-5 h-5 text-primary" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-1 truncate group-hover:text-primary transition-colors">
-                  {audio.title}
-                </h3>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {audio.description}
-                </p>
-              </div>
-              
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  <span className="text-xs">{audio.duration}</span>
-                </div>
-                {!audio.locked && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="w-10 h-10 rounded-full hover:bg-primary/10"
-                    onClick={() => setPlaying(playing === audio.id ? null : audio.id)}
-                  >
-                    {playing === audio.id ? (
-                      <Pause className="w-4 h-4 text-primary" />
-                    ) : (
-                      <Play className="w-4 h-4 text-primary ml-0.5" />
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {'frequency' in audio && typeof audio.frequency === 'string' && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+                        {audio.frequency}
+                      </span>
                     )}
-                  </Button>
-                )}
-              </div>
-            </motion.div>
-          ))}
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-1 truncate group-hover:text-primary transition-colors">
+                    {audio.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {audio.description}
+                  </p>
+                </div>
+                
+                <div className="flex flex-col items-end gap-2">
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    <Clock className="w-3 h-3" />
+                    <span className="text-xs">{audio.duration}</span>
+                  </div>
+                  {!audio.locked && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="w-10 h-10 rounded-full hover:bg-primary/10"
+                      onClick={() => setPlaying(playing === audio.id ? null : audio.id)}
+                    >
+                      {playing === audio.id ? (
+                        <Pause className="w-4 h-4 text-primary" />
+                      ) : (
+                        <Play className="w-4 h-4 text-primary ml-0.5" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Modals */}
       {showMeditationBuilder && (
@@ -462,11 +592,12 @@ export const StudioTab = () => {
           script={viewingSavedScript.script}
           title={viewingSavedScript.title}
           category={viewingSavedScript.category}
+          onClose={() => setViewingSavedScript(null)}
+          onSave={handleSaveScript}
           savedScriptId={viewingSavedScript.id}
           isFavorite={viewingSavedScript.isFavorite}
           onToggleFavorite={toggleFavorite}
           existingAudioUrl={viewingSavedScript.audioUrl}
-          onClose={() => setViewingSavedScript(null)}
         />
       )}
     </div>

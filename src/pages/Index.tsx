@@ -131,7 +131,7 @@ const Index = () => {
   const renderDashboardContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab userProfile={userProfile} />;
+        return <HomeTab userProfile={userProfile} onNavigateToProfile={() => setActiveTab('profile')} />;
       case 'codex':
         return <CodexTab />;
       case 'studio':
@@ -143,7 +143,7 @@ const Index = () => {
       case 'profile':
         return <ProfileTab userProfile={userProfile} />;
       default:
-        return <HomeTab userProfile={userProfile} />;
+        return <HomeTab userProfile={userProfile} onNavigateToProfile={() => setActiveTab('profile')} />;
     }
   };
 
