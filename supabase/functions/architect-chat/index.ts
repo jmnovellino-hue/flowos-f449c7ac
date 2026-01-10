@@ -1,9 +1,94 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Fetch common learnings from database
+async function getLearnings(supabase: any, archetype?: string): Promise<string> {
+  try {
+    let query = supabase
+      .from('architect_learnings')
+      .select('topic, pattern')
+      .order('frequency', { ascending: false })
+      .limit(10);
+    
+    if (archetype) {
+      query = query.eq('archetype', archetype);
+    }
+
+    const { data } = await query;
+    
+    if (data && data.length > 0) {
+      const patterns = data.map((l: any) => `- ${l.topic}: ${l.pattern}`).join('\n');
+      return `\n\n## COLLECTIVE WISDOM FROM LEADERS
+The following patterns have emerged from conversations with leaders like you:\n${patterns}`;
+    }
+    return '';
+  } catch (error) {
+    console.error('Error fetching learnings:', error);
+    return '';
+  }
+}
+
+// Extract and save learnings from conversation (anonymized)
+async function extractLearnings(supabase: any, messages: any[], archetype?: string): Promise<void> {
+  try {
+    // Only extract if there are meaningful exchanges (at least 2 user messages)
+    const userMessages = messages.filter((m: any) => m.role === 'user');
+    if (userMessages.length < 2) return;
+
+    // Simple topic extraction from user messages
+    const topics = [
+      { keyword: 'decision', topic: 'Decision Making' },
+      { keyword: 'team', topic: 'Team Leadership' },
+      { keyword: 'anxiety', topic: 'Stress Management' },
+      { keyword: 'conflict', topic: 'Conflict Resolution' },
+      { keyword: 'procrastin', topic: 'Productivity' },
+      { keyword: 'delegation', topic: 'Delegation' },
+      { keyword: 'burnout', topic: 'Work-Life Balance' },
+      { keyword: 'feedback', topic: 'Giving Feedback' },
+      { keyword: 'motivation', topic: 'Motivation' },
+      { keyword: 'fear', topic: 'Overcoming Fear' },
+    ];
+
+    const allUserContent = userMessages.map((m: any) => m.content.toLowerCase()).join(' ');
+    
+    for (const { keyword, topic } of topics) {
+      if (allUserContent.includes(keyword)) {
+        // Upsert the learning pattern
+        const { data: existing } = await supabase
+          .from('architect_learnings')
+          .select('id, frequency')
+          .eq('topic', topic)
+          .eq('archetype', archetype || 'general')
+          .maybeSingle();
+
+        if (existing) {
+          await supabase
+            .from('architect_learnings')
+            .update({ 
+              frequency: existing.frequency + 1,
+              last_seen_at: new Date().toISOString()
+            })
+            .eq('id', existing.id);
+        } else {
+          await supabase
+            .from('architect_learnings')
+            .insert({
+              topic,
+              pattern: `${archetype || 'Leaders'} often seek guidance on ${topic.toLowerCase()}`,
+              archetype: archetype || 'general',
+            });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error extracting learnings:', error);
+  }
+}
 
 const ARCHITECT_SYSTEM_PROMPT = `You are THE ARCHITECT — the "Full-Stack" Human Optimization Partner for FlowOS.
 
@@ -88,13 +173,21 @@ serve(async (req) => {
   try {
     const { messages, userContext } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Create Supabase client for learnings
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Fetch collective learnings
+    const learnings = await getLearnings(supabase, userContext?.archetype);
+
     // Build context-aware system prompt
-    let contextualPrompt = ARCHITECT_SYSTEM_PROMPT;
+    let contextualPrompt = ARCHITECT_SYSTEM_PROMPT + learnings;
     
     if (userContext) {
       contextualPrompt += `\n\n## USER CONTEXT
@@ -105,6 +198,9 @@ serve(async (req) => {
 
 Tailor your responses to their archetype. If they are "The Hero", address their tendency toward martyrdom and control. If "The Judge", address their tendency toward rigidity and criticism. If "The Teacher", address their tendency toward superiority. If "The Servant", address their tendency toward self-abandonment.`;
     }
+
+    // Extract learnings from this conversation (non-blocking)
+    extractLearnings(supabase, messages, userContext?.archetype);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

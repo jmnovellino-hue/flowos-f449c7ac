@@ -14,6 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
+      architect_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          messages: Json
+          summary: string | null
+          title: string
+          topics: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          summary?: string | null
+          title?: string
+          topics?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          messages?: Json
+          summary?: string | null
+          title?: string
+          topics?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      architect_insights: {
+        Row: {
+          content: string
+          conversation_id: string | null
+          created_at: string
+          id: string
+          is_favorite: boolean | null
+          source_layer: string | null
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          source_layer?: string | null
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          is_favorite?: boolean | null
+          source_layer?: string | null
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "architect_insights_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "architect_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      architect_learnings: {
+        Row: {
+          archetype: string | null
+          created_at: string
+          frequency: number | null
+          id: string
+          last_seen_at: string
+          pattern: string
+          topic: string
+        }
+        Insert: {
+          archetype?: string | null
+          created_at?: string
+          frequency?: number | null
+          id?: string
+          last_seen_at?: string
+          pattern: string
+          topic: string
+        }
+        Update: {
+          archetype?: string | null
+          created_at?: string
+          frequency?: number | null
+          id?: string
+          last_seen_at?: string
+          pattern?: string
+          topic?: string
+        }
+        Relationships: []
+      }
       audio_scripts: {
         Row: {
           audio_url: string | null
