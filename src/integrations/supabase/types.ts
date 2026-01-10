@@ -298,14 +298,19 @@ export type Database = {
         Row: {
           archetype: string | null
           avatar_url: string | null
+          bio: string | null
           created_at: string
           display_name: string | null
           email: string | null
+          email_notifications_enabled: boolean | null
           email_verification_sent_at: string | null
           email_verification_token: string | null
           email_verified: boolean | null
           id: string
           last_digest_sent_at: string | null
+          phone: string | null
+          push_notifications_enabled: boolean | null
+          reminder_time: string | null
           streak: number | null
           tier: string | null
           updated_at: string
@@ -316,14 +321,19 @@ export type Database = {
         Insert: {
           archetype?: string | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          email_notifications_enabled?: boolean | null
           email_verification_sent_at?: string | null
           email_verification_token?: string | null
           email_verified?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
+          phone?: string | null
+          push_notifications_enabled?: boolean | null
+          reminder_time?: string | null
           streak?: number | null
           tier?: string | null
           updated_at?: string
@@ -334,14 +344,19 @@ export type Database = {
         Update: {
           archetype?: string | null
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           display_name?: string | null
           email?: string | null
+          email_notifications_enabled?: boolean | null
           email_verification_sent_at?: string | null
           email_verification_token?: string | null
           email_verified?: boolean | null
           id?: string
           last_digest_sent_at?: string | null
+          phone?: string | null
+          push_notifications_enabled?: boolean | null
+          reminder_time?: string | null
           streak?: number | null
           tier?: string | null
           updated_at?: string
