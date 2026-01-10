@@ -25,8 +25,12 @@ serve(async (req) => {
     // Truncate text if too long (ElevenLabs limit is 5000 chars)
     const truncatedText = text.length > 5000 ? text.substring(0, 5000) : text;
 
+    // Use Laura voice for calm, relaxing meditation narration
+    const meditationVoiceId = "FGY2WhTYpPnrIDTdsKH5"; // Laura - calm female voice
+    const selectedVoice = voiceId === "EXAVITQu4vr4xnSDxMaL" ? meditationVoiceId : voiceId;
+
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}?output_format=mp3_44100_128`,
       {
         method: "POST",
         headers: {
@@ -37,11 +41,11 @@ serve(async (req) => {
           text: truncatedText,
           model_id: "eleven_multilingual_v2",
           voice_settings: {
-            stability: 0.6,
-            similarity_boost: 0.75,
-            style: 0.3,
-            use_speaker_boost: true,
-            speed: 0.9,
+            stability: 0.85,        // Higher stability for calmer, more consistent voice
+            similarity_boost: 0.6,  // Slightly reduced for softer sound
+            style: 0.15,            // Low style for gentle, understated delivery
+            use_speaker_boost: false, // Disabled for softer, more intimate sound
+            speed: 0.75,            // Slower pace for relaxation
           },
         }),
       }

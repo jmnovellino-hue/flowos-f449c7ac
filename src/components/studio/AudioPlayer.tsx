@@ -9,16 +9,40 @@ interface AudioPlayerProps {
   title: string;
   onClose?: () => void;
   autoPlay?: boolean;
+  backgroundFrequency?: 'nature' | 'elevate' | 'enlightenment';
 }
 
-export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false }: AudioPlayerProps) => {
+// Binaural frequency audio URLs (royalty-free frequencies)
+const FREQUENCY_URLS: Record<string, string> = {
+  nature: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8cb749d484.mp3', // 432Hz ambient
+  elevate: 'https://cdn.pixabay.com/download/audio/2022/01/20/audio_8b2af3cc03.mp3', // Ambient meditation
+  enlightenment: 'https://cdn.pixabay.com/download/audio/2021/04/06/audio_f927d5c6ee.mp3', // Higher frequency ambient
+};
+
+export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false, backgroundFrequency }: AudioPlayerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const bgAudioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
+
+  // Initialize background audio
+  useEffect(() => {
+    if (backgroundFrequency && FREQUENCY_URLS[backgroundFrequency]) {
+      const bgAudio = new Audio(FREQUENCY_URLS[backgroundFrequency]);
+      bgAudio.loop = true;
+      bgAudio.volume = 0.3; // Lower volume for background
+      bgAudioRef.current = bgAudio;
+
+      return () => {
+        bgAudio.pause();
+        bgAudio.src = '';
+      };
+    }
+  }, [backgroundFrequency]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -30,6 +54,10 @@ export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false }: Audi
       if (autoPlay) {
         audio.play();
         setIsPlaying(true);
+        // Start background audio when main audio plays
+        if (bgAudioRef.current) {
+          bgAudioRef.current.play().catch(() => {});
+        }
       }
     };
 
@@ -40,6 +68,11 @@ export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false }: Audi
     const handleEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
+      // Stop background audio when main audio ends
+      if (bgAudioRef.current) {
+        bgAudioRef.current.pause();
+        bgAudioRef.current.currentTime = 0;
+      }
     };
 
     const handleCanPlay = () => {
@@ -65,8 +98,10 @@ export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false }: Audi
 
     if (isPlaying) {
       audio.pause();
+      if (bgAudioRef.current) bgAudioRef.current.pause();
     } else {
       audio.play();
+      if (bgAudioRef.current) bgAudioRef.current.play().catch(() => {});
     }
     setIsPlaying(!isPlaying);
   };
@@ -85,6 +120,10 @@ export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false }: Audi
     audio.volume = newVolume;
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
+    // Background audio stays at 30% of main volume
+    if (bgAudioRef.current) {
+      bgAudioRef.current.volume = newVolume * 0.3;
+    }
   };
 
   const toggleMute = () => {
@@ -92,9 +131,11 @@ export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false }: Audi
     if (!audio) return;
     if (isMuted) {
       audio.volume = volume || 0.8;
+      if (bgAudioRef.current) bgAudioRef.current.volume = (volume || 0.8) * 0.3;
       setIsMuted(false);
     } else {
       audio.volume = 0;
+      if (bgAudioRef.current) bgAudioRef.current.volume = 0;
       setIsMuted(true);
     }
   };

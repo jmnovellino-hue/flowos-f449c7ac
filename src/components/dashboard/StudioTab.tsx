@@ -163,8 +163,8 @@ export const StudioTab = () => {
   const [playing, setPlaying] = useState<string | null>(null);
   const [showMeditationBuilder, setShowMeditationBuilder] = useState(false);
   const [showPerformanceBuilder, setShowPerformanceBuilder] = useState(false);
-  const [generatedScript, setGeneratedScript] = useState<{ script: string; title: string; category: 'meditation' | 'performance' } | null>(null);
-  const [viewingSavedScript, setViewingSavedScript] = useState<{ id: string; script: string; title: string; category: 'meditation' | 'performance'; isFavorite: boolean; audioUrl?: string } | null>(null);
+  const [generatedScript, setGeneratedScript] = useState<{ script: string; title: string; category: 'meditation' | 'performance'; backgroundFrequency?: 'nature' | 'elevate' | 'enlightenment' } | null>(null);
+  const [viewingSavedScript, setViewingSavedScript] = useState<{ id: string; script: string; title: string; category: 'meditation' | 'performance'; isFavorite: boolean; audioUrl?: string; backgroundFrequency?: string } | null>(null);
 
   const { scripts, favorites, saveScript, toggleFavorite, loading } = useAudioScripts();
 
@@ -185,9 +185,9 @@ export const StudioTab = () => {
     return scripts.filter(s => s.category === activeCategory);
   };
 
-  const handleMeditationComplete = (script: string) => {
+  const handleMeditationComplete = (script: string, backgroundFrequency: 'nature' | 'elevate' | 'enlightenment') => {
     setShowMeditationBuilder(false);
-    setGeneratedScript({ script, title: 'Custom Meditation', category: 'meditation' });
+    setGeneratedScript({ script, title: 'Custom Meditation', category: 'meditation', backgroundFrequency });
   };
 
   const handlePerformanceComplete = (script: string, situation: string) => {
@@ -583,6 +583,7 @@ export const StudioTab = () => {
           script={generatedScript.script}
           title={generatedScript.title}
           category={generatedScript.category}
+          backgroundFrequency={generatedScript.backgroundFrequency}
           onClose={() => setGeneratedScript(null)}
           onSave={handleSaveScript}
         />
