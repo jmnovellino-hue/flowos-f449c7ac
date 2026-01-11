@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { WisdomLibrary } from './WisdomLibrary';
+import DOMPurify from 'dompurify';
 
 interface Message {
   id: string;
@@ -451,10 +452,14 @@ export const ArchitectTab = ({ userContext, userId }: ArchitectTabProps) => {
   };
 
   const renderContent = (content: string) => {
-    return content
+    const formatted = content
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/^• /gm, '• ');
+    return DOMPurify.sanitize(formatted, { 
+      ALLOWED_TAGS: ['strong', 'em', 'br', 'p'], 
+      ALLOWED_ATTR: [] 
+    });
   };
 
   const handleTextSelection = (messageContent: string) => {
