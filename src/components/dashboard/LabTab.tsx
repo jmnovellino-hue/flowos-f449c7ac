@@ -1,9 +1,12 @@
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Moon, Utensils, Activity, Lock, TrendingUp, Droplets, Wind, BookHeart, Timer, Trophy, Users, Sparkles } from 'lucide-react';
+import { Brain, Moon, Utensils, Activity, TrendingUp, Droplets, Wind, BookHeart, Timer, Trophy, Users, Sparkles, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { useState, useMemo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface WellnessActivity {
   id: string;
@@ -105,9 +108,43 @@ const mockUserStats = {
 };
 
 export const LabTab = () => {
+  const { user } = useAuth();
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
   const [isPremium] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasSavedToday, setHasSavedToday] = useState(false);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadTodayData();
+    }
+  }, [user?.id]);
+
+  const loadTodayData = async () => {
+    if (!user?.id) return;
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data } = await supabase
+      .from('journal_entries')
+      .select('thoughts')
+      .eq('user_id', user.id)
+      .eq('entry_date', today)
+      .maybeSingle();
+    
+    if (data?.thoughts) {
+      try {
+        // Try to parse wellness data from thoughts field (temporary storage)
+        const parsed = JSON.parse(data.thoughts);
+        if (parsed.wellness_activities) {
+          setCheckedItems(parsed.wellness_activities);
+          setHasSavedToday(true);
+        }
+      } catch {
+        // Not wellness data, ignore
+      }
+    }
+  };
 
   const handleCheck = (itemId: string) => {
     setCheckedItems(prev => ({
@@ -139,8 +176,49 @@ export const LabTab = () => {
   }, []);
 
   const scorePercentage = Math.round((totalScore / maxScore) * 100);
-
   const isNewPersonalBest = scorePercentage > mockUserStats.personalBest;
+
+  const handleSaveLog = async () => {
+    if (!user?.id) {
+      toast.error('Please sign in to save your wellness log');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Store wellness activities in thoughts field as JSON (temporary - would need dedicated table for production)
+      const wellnessData = JSON.stringify({
+        wellness_activities: checkedItems,
+        total_score: totalScore,
+        max_score: maxScore,
+        saved_at: new Date().toISOString()
+      });
+      
+      const { error } = await supabase
+        .from('journal_entries')
+        .upsert({
+          user_id: user.id,
+          entry_date: today,
+          mood: Math.ceil(scorePercentage / 20), // Convert to 1-5 scale
+          energy: Math.ceil(scorePercentage / 20),
+          thoughts: wellnessData,
+        }, {
+          onConflict: 'user_id,entry_date'
+        });
+
+      if (error) throw error;
+
+      toast.success(isNewPersonalBest ? '🎉 New Personal Best! Log saved!' : 'Wellness log saved!');
+      setHasSavedToday(true);
+    } catch (error: any) {
+      console.error('Error saving wellness log:', error);
+      toast.error(error.message || 'Failed to save log');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto pb-24 md:pb-10">
@@ -348,12 +426,32 @@ export const LabTab = () => {
             transition={{ delay: 0.25 }}
             className="glass-surface rounded-2xl p-6 border-l-4 border-l-primary"
           >
-            <h3 className="font-medium text-foreground mb-2">Daily Logging</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-medium text-foreground">Daily Logging</h3>
+              {hasSavedToday && (
+                <span className="text-xs text-primary flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Saved
+                </span>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground mb-4">
               Consistent tracking builds awareness and drives improvement. Log your metrics every day to maintain your streak.
             </p>
-            <Button className="w-full bg-primary hover:bg-primary/90 glow-turquoise">
-              Save Today's Log
+            <Button 
+              className="w-full bg-primary hover:bg-primary/90 glow-turquoise"
+              onClick={handleSaveLog}
+              disabled={isSaving || totalScore === 0}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : hasSavedToday ? (
+                "Update Today's Log"
+              ) : (
+                "Save Today's Log"
+              )}
             </Button>
           </motion.div>
         </div>

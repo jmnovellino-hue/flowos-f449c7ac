@@ -1,10 +1,13 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, TrendingUp, Quote } from 'lucide-react';
+import { Flame, TrendingUp, Quote, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { JournalingSection } from './JournalingSection';
 import { MicroExperimentsSection } from './MicroExperimentsSection';
 import { CommitmentTracker } from './CommitmentTracker';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface HomeTabProps {
   userProfile: {
@@ -28,6 +31,67 @@ const dailyWisdom = {
 };
 
 export const HomeTab = ({ userProfile, userId, onNavigateToProfile }: HomeTabProps) => {
+  const [sleepQuality, setSleepQuality] = useState(7);
+  const [energyLevel, setEnergyLevel] = useState(8);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasSavedToday, setHasSavedToday] = useState(false);
+
+  useEffect(() => {
+    if (userId) {
+      checkTodayEntry();
+    }
+  }, [userId]);
+
+  const checkTodayEntry = async () => {
+    if (!userId) return;
+    const today = new Date().toISOString().split('T')[0];
+    const { data } = await supabase
+      .from('journal_entries')
+      .select('mood, energy')
+      .eq('user_id', userId)
+      .eq('entry_date', today)
+      .maybeSingle();
+    
+    if (data) {
+      setHasSavedToday(true);
+      setSleepQuality(data.mood);
+      setEnergyLevel(data.energy);
+    }
+  };
+
+  const handleLogToday = async () => {
+    if (!userId) {
+      toast.error('Please sign in to log your daily stats');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { error } = await supabase
+        .from('journal_entries')
+        .upsert({
+          user_id: userId,
+          entry_date: today,
+          mood: sleepQuality,
+          energy: energyLevel,
+        }, {
+          onConflict: 'user_id,entry_date'
+        });
+
+      if (error) throw error;
+
+      toast.success('Daily bio check-in saved!');
+      setHasSavedToday(true);
+    } catch (error: any) {
+      console.error('Error saving bio check-in:', error);
+      toast.error(error.message || 'Failed to save check-in');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return { text: 'Good Morning', subtitle: 'Focus.' };
@@ -156,37 +220,59 @@ export const HomeTab = ({ userProfile, userId, onNavigateToProfile }: HomeTabPro
             transition={{ delay: 0.35 }}
             className="glass-surface rounded-2xl p-6"
           >
-            <h3 className="font-medium text-foreground mb-4">Quick Bio Check-in</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-foreground">Quick Bio Check-in</h3>
+              {hasSavedToday && (
+                <span className="text-xs text-primary flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Logged
+                </span>
+              )}
+            </div>
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Sleep Quality</span>
-                  <span className="text-foreground font-medium">7/10</span>
+                  <span className="text-foreground font-medium">{sleepQuality}/10</span>
                 </div>
                 <input
                   type="range"
                   min="1"
                   max="10"
-                  defaultValue="7"
+                  value={sleepQuality}
+                  onChange={(e) => setSleepQuality(parseInt(e.target.value))}
                   className="w-full accent-primary"
                 />
               </div>
               <div>
                 <div className="flex items-center justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Energy Level</span>
-                  <span className="text-foreground font-medium">8/10</span>
+                  <span className="text-foreground font-medium">{energyLevel}/10</span>
                 </div>
                 <input
                   type="range"
                   min="1"
                   max="10"
-                  defaultValue="8"
+                  value={energyLevel}
+                  onChange={(e) => setEnergyLevel(parseInt(e.target.value))}
                   className="w-full accent-secondary"
                 />
               </div>
             </div>
-            <Button className="w-full mt-4 bg-primary hover:bg-primary/90">
-              Log Today
+            <Button 
+              className="w-full mt-4 bg-primary hover:bg-primary/90"
+              onClick={handleLogToday}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : hasSavedToday ? (
+                'Update Log'
+              ) : (
+                'Log Today'
+              )}
             </Button>
           </motion.div>
         </div>
