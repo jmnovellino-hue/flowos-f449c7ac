@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Volume2, Copy, Check, Save, Play, Loader2, Heart, HeartOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { AudioPlayer } from './AudioPlayer';
 
 interface ScriptViewerProps {
@@ -19,6 +20,20 @@ interface ScriptViewerProps {
   onToggleFavorite?: (id: string) => void;
   existingAudioUrl?: string;
 }
+
+// Helper to extract storage path from a Supabase storage URL
+const extractStoragePath = (url: string): string | null => {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (url.includes(supabaseUrl) && url.includes('/storage/v1/object/public/audio-files/')) {
+      const path = url.split('/storage/v1/object/public/audio-files/')[1];
+      return path ? decodeURIComponent(path) : null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 export const ScriptViewer = ({ 
   script, 
@@ -37,8 +52,50 @@ export const ScriptViewer = ({
   const [copied, setCopied] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(existingAudioUrl || null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [localScriptId, setLocalScriptId] = useState<string | null>(savedScriptId || null);
+
+  // Load existing audio from private storage bucket
+  useEffect(() => {
+    const loadExistingAudio = async () => {
+      if (!existingAudioUrl) return;
+      
+      const storagePath = extractStoragePath(existingAudioUrl);
+      
+      if (storagePath) {
+        // It's a Supabase storage URL - download using authenticated client
+        setIsLoadingAudio(true);
+        try {
+          const { data, error } = await supabase.storage
+            .from('audio-files')
+            .download(storagePath);
+          
+          if (error) throw error;
+          
+          const blobUrl = URL.createObjectURL(data);
+          setAudioUrl(blobUrl);
+        } catch (error) {
+          console.error('Error loading audio from storage:', error);
+          toast.error('Failed to load saved audio');
+        } finally {
+          setIsLoadingAudio(false);
+        }
+      } else {
+        // It's a direct URL (blob URL or external) - use as-is
+        setAudioUrl(existingAudioUrl);
+      }
+    };
+
+    loadExistingAudio();
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (audioUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [existingAudioUrl]);
 
   const handleCopy = async () => {
     try {
@@ -146,7 +203,14 @@ export const ScriptViewer = ({
         </div>
 
         {/* Audio Player or Generate Button */}
-        {audioUrl ? (
+        {isLoadingAudio ? (
+          <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Loading saved audio...</span>
+            </div>
+          </div>
+        ) : audioUrl ? (
           <div className="mb-4">
             <AudioPlayer audioUrl={audioUrl} title={title} autoPlay backgroundFrequency={backgroundFrequency} />
           </div>
