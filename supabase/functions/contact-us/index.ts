@@ -1,6 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const RATE_LIMIT_MAX_REQUESTS = 5; // Max 5 requests per hour per identifier
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +20,21 @@ interface ContactRequest {
   subject: string;
   message: string;
   userId?: string;
+  // Honeypot field - should be empty
+  website?: string;
+}
+
+// Get identifier for rate limiting (IP or fallback)
+function getIdentifier(req: Request): string {
+  const forwarded = req.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0].trim();
+  }
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp) {
+    return realIp;
+  }
+  return "unknown";
 }
 
 serve(async (req: Request): Promise<Response> => {
@@ -21,7 +43,17 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, subject, message, userId }: ContactRequest = await req.json();
+    const { name, email, subject, message, userId, website }: ContactRequest = await req.json();
+
+    // Honeypot check - bots will fill this field
+    if (website && website.trim().length > 0) {
+      // Silently reject but return success to not alert bots
+      console.log("Honeypot triggered, rejecting submission");
+      return new Response(
+        JSON.stringify({ success: true, message: "Message sent successfully" }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
     // Validate inputs
     if (!name || name.trim().length === 0 || name.length > 100) {
@@ -36,6 +68,55 @@ serve(async (req: Request): Promise<Response> => {
     if (!message || message.trim().length === 0 || message.length > 5000) {
       throw new Error("Message is required and must be less than 5000 characters");
     }
+
+    // Initialize Supabase client with service role for rate limiting
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Rate limiting check
+    const identifier = getIdentifier(req);
+    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+
+    // Get current request count for this identifier within the window
+    const { data: rateLimitData, error: rateLimitError } = await supabase
+      .from("contact_rate_limits")
+      .select("id, request_count")
+      .eq("identifier", identifier)
+      .gte("window_start", windowStart)
+      .single();
+
+    if (rateLimitError && rateLimitError.code !== "PGRST116") {
+      // PGRST116 = no rows found, which is fine
+      console.error("Rate limit check error:", rateLimitError);
+    }
+
+    if (rateLimitData && rateLimitData.request_count >= RATE_LIMIT_MAX_REQUESTS) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Update or insert rate limit record
+    if (rateLimitData) {
+      await supabase
+        .from("contact_rate_limits")
+        .update({ request_count: rateLimitData.request_count + 1 })
+        .eq("id", rateLimitData.id);
+    } else {
+      await supabase
+        .from("contact_rate_limits")
+        .insert({
+          identifier,
+          request_count: 1,
+          window_start: new Date().toISOString(),
+        });
+    }
+
+    // Clean up old rate limit records (older than window)
+    await supabase
+      .from("contact_rate_limits")
+      .delete()
+      .lt("window_start", windowStart);
 
     // Send email to H2H team
     const emailResponse = await fetch("https://api.resend.com/emails", {
