@@ -56,16 +56,48 @@ const BetaAdmin = () => {
   const { user, loading: authLoading } = useAuth();
   const [applications, setApplications] = useState<BetaApplication[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'qualified' | 'not_qualified' | 'accessed'>('all');
   const [selectedApp, setSelectedApp] = useState<BetaApplication | null>(null);
   const [notes, setNotes] = useState('');
 
+  // Check if user is admin before loading data
   useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('admin_users')
+          .select('user_id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error || !data) {
+          setIsAdmin(false);
+          toast.error("Unauthorized: Admin access required");
+          return;
+        }
+
+        setIsAdmin(true);
+        // Only fetch applications if user is admin
+        fetchApplications();
+      } catch (error) {
+        console.error('Admin check error:', error);
+        setIsAdmin(false);
+      }
+    };
+
     if (user) {
-      fetchApplications();
+      checkAdminStatus();
+    } else if (!authLoading) {
+      setIsAdmin(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -224,14 +256,25 @@ const BetaAdmin = () => {
     );
   }
 
-  if (!user) {
+  if (!user || isAdmin === false) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Admin Access Required</h2>
-          <p className="text-muted-foreground mb-6">Please log in to access the admin dashboard.</p>
-          <Button onClick={() => window.location.href = '/'}>Go to Login</Button>
+          <p className="text-muted-foreground mb-6">
+            {!user ? "Please log in to access the admin dashboard." : "You don't have permission to access this page."}
+          </p>
+          <Button onClick={() => window.location.href = '/'}>Go to Home</Button>
         </div>
+      </div>
+    );
+  }
+
+  // Still checking admin status
+  if (isAdmin === null) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
       </div>
     );
   }

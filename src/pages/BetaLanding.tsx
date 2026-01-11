@@ -266,8 +266,8 @@ const BetaLanding = () => {
         return;
       }
 
-      // Track analytics and store email for tracking
-      localStorage.setItem('beta_email', userInfo.email.trim().toLowerCase());
+      // Track analytics and store email for tracking (using sessionStorage for security)
+      sessionStorage.setItem('beta_email', userInfo.email.trim().toLowerCase());
       trackBetaEvent('info_submitted', { email: userInfo.email, matchPercentage });
       trackBetaEvent(qualified ? 'qualified' : 'not_qualified', { email: userInfo.email, matchPercentage });
 

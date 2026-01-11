@@ -25,6 +25,7 @@ export const ContactSection = () => {
     email: user?.email || '',
     subject: '',
     message: '',
+    website: '', // Honeypot field
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -107,7 +108,7 @@ export const ContactSection = () => {
           variant="outline"
           onClick={() => {
             setIsSubmitted(false);
-            setFormData({ name: '', email: user?.email || '', subject: '', message: '' });
+            setFormData({ name: '', email: user?.email || '', subject: '', message: '', website: '' });
           }}
         >
           Send Another Message
@@ -187,6 +188,18 @@ export const ContactSection = () => {
             className={errors.message ? 'border-destructive' : ''}
           />
           {errors.message && <p className="text-xs text-destructive">{errors.message}</p>}
+        </div>
+
+        {/* Honeypot field - hidden from users but visible to bots */}
+        <div className="absolute left-[-9999px]" aria-hidden="true">
+          <Input
+            type="text"
+            name="website"
+            value={formData.website}
+            onChange={handleChange}
+            tabIndex={-1}
+            autoComplete="off"
+          />
         </div>
 
         <div className="flex items-center justify-between pt-2">

@@ -88,7 +88,7 @@ const BetaLaunch = () => {
     trackBetaEvent('launch_page_viewed');
     
     const trackAccess = async () => {
-      const storedEmail = localStorage.getItem('beta_email');
+      const storedEmail = sessionStorage.getItem('beta_email');
       if (storedEmail) {
         setUserEmail(storedEmail);
         await supabase
