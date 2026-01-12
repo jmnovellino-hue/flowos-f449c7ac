@@ -18,6 +18,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useCommitments } from '@/hooks/useCommitments';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { QuantumBubbleButton } from '@/components/quantum/QuantumBubbleButton';
 
 type AppState = 'auth' | 'journey-intro' | 'assessment' | 'dashboard';
 
@@ -240,14 +241,17 @@ const Index = () => {
   }
 
   return (
-    <DashboardLayout 
-      activeTab={activeTab} 
-      onTabChange={setActiveTab}
-      userName={userProfile.name}
-      avatarUrl={avatarUrl}
-    >
-      {renderDashboardContent()}
-    </DashboardLayout>
+    <>
+      <DashboardLayout 
+        activeTab={activeTab} 
+        onTabChange={setActiveTab}
+        userName={userProfile.name}
+        avatarUrl={avatarUrl}
+      >
+        {renderDashboardContent()}
+      </DashboardLayout>
+      <QuantumBubbleButton />
+    </>
   );
 };
 

@@ -375,6 +375,36 @@ export type Database = {
         }
         Relationships: []
       }
+      focus_sessions: {
+        Row: {
+          audio_type: string | null
+          completed: boolean | null
+          duration_minutes: number
+          ended_at: string | null
+          id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          audio_type?: string | null
+          completed?: boolean | null
+          duration_minutes: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          audio_type?: string | null
+          completed?: boolean | null
+          duration_minutes?: number
+          ended_at?: string | null
+          id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           concerns: string | null
@@ -480,6 +510,80 @@ export type Database = {
           user_id?: string
           values?: string[] | null
           weekly_digest_enabled?: boolean | null
+        }
+        Relationships: []
+      }
+      routine_logs: {
+        Row: {
+          completed_at: string
+          id: string
+          notes: string | null
+          routine_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          notes?: string | null
+          routine_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          notes?: string | null
+          routine_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "routine_logs_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      routines: {
+        Row: {
+          category: string
+          created_at: string
+          days_of_week: number[]
+          description: string | null
+          id: string
+          is_active: boolean | null
+          reminder_enabled: boolean | null
+          time_of_day: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          days_of_week?: number[]
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          reminder_enabled?: boolean | null
+          time_of_day: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          days_of_week?: number[]
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          reminder_enabled?: boolean | null
+          time_of_day?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
