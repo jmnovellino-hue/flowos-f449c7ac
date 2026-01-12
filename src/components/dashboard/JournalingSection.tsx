@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Brain, Zap, AlertCircle, ChevronDown, ChevronUp, TrendingUp, Info, Loader2 } from 'lucide-react';
+import { BookOpen, Brain, Zap, AlertCircle, ChevronDown, ChevronUp, TrendingUp, Info, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { JournalInsights } from '@/components/journal/JournalInsights';
 
 interface JournalEntry {
   date: string;
@@ -43,6 +44,7 @@ export const JournalingSection = ({ userId }: JournalingSectionProps) => {
   const [isSaving, setIsSaving] = useState(false);
   const [weekData, setWeekData] = useState<JournalEntry[]>([]);
   const [todayEntrySaved, setTodayEntrySaved] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
 
   useEffect(() => {
     if (userId) {
@@ -135,6 +137,7 @@ export const JournalingSection = ({ userId }: JournalingSectionProps) => {
 
       toast.success('Journal entry saved!');
       setTodayEntrySaved(true);
+      setShowInsights(true); // Show AI insights after saving
       loadWeekData();
     } catch (error: any) {
       console.error('Error saving journal entry:', error);
@@ -387,6 +390,30 @@ export const JournalingSection = ({ userId }: JournalingSectionProps) => {
               'Save Today\'s Entry'
             )}
           </Button>
+
+          {/* AI Insights Section */}
+          {todayEntrySaved && selectedMood && selectedEnergy && (
+            <>
+              {!showInsights && (
+                <Button
+                  variant="outline"
+                  className="w-full mt-3 gap-2 border-primary/50 text-primary hover:bg-primary/10"
+                  onClick={() => setShowInsights(true)}
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Get AI Insights for Today
+                </Button>
+              )}
+              <JournalInsights
+                mood={selectedMood}
+                energy={selectedEnergy}
+                thoughts={thoughts}
+                concerns={concerns}
+                isVisible={showInsights}
+                onClose={() => setShowInsights(false)}
+              />
+            </>
+          )}
         </motion.div>
       )}
     </motion.div>

@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Moon, Utensils, Activity, TrendingUp, Droplets, Wind, BookHeart, Timer, Trophy, Users, Sparkles, Loader2, Check } from 'lucide-react';
+import { Brain, Moon, Utensils, Activity, TrendingUp, Droplets, Wind, BookHeart, Timer, Trophy, Users, Sparkles, Loader2, Check, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { RoutineScheduler } from '@/components/lab/RoutineScheduler';
+import { EvolutionHub } from '@/components/gamification/EvolutionHub';
 
 interface WellnessActivity {
   id: string;
@@ -115,6 +116,7 @@ export const LabTab = () => {
   const [isPremium] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasSavedToday, setHasSavedToday] = useState(false);
+  const [showEvolutionHub, setShowEvolutionHub] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -371,21 +373,25 @@ export const LabTab = () => {
             </div>
           </motion.div>
 
-          {/* Gamification Stats */}
+          {/* Gamification Stats - Now Clickable */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="glass-surface rounded-2xl p-6"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowEvolutionHub(true)}
+            className="glass-surface rounded-2xl p-6 cursor-pointer group"
           >
             <div className="flex items-center gap-2 mb-4">
               <Trophy className="w-5 h-5 text-secondary" />
               <span className="font-medium text-foreground">Your Progress</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
             </div>
 
             <div className="space-y-4">
               {/* Personal Best */}
-              <div className="p-3 rounded-xl bg-muted/50">
+              <div className="p-3 rounded-xl bg-muted/50 group-hover:bg-primary/10 transition-colors">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-muted-foreground">Personal Best</span>
                   <span className="text-lg font-semibold text-primary">{mockUserStats.personalBest}%</span>
@@ -394,7 +400,7 @@ export const LabTab = () => {
               </div>
 
               {/* Percentile Ranking */}
-              <div className="p-3 rounded-xl bg-muted/50">
+              <div className="p-3 rounded-xl bg-muted/50 group-hover:bg-primary/10 transition-colors">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">Community Ranking</span>
@@ -408,7 +414,7 @@ export const LabTab = () => {
               </div>
 
               {/* Streak */}
-              <div className="p-3 rounded-xl bg-muted/50">
+              <div className="p-3 rounded-xl bg-muted/50 group-hover:bg-primary/10 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-secondary" />
@@ -416,6 +422,14 @@ export const LabTab = () => {
                   </div>
                   <span className="text-lg font-semibold text-secondary">{mockUserStats.streak} days</span>
                 </div>
+              </div>
+
+              {/* Call to action */}
+              <div className="text-center pt-2">
+                <p className="text-xs text-primary font-medium flex items-center justify-center gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  Tap to view Evolution Hub
+                </p>
               </div>
             </div>
           </motion.div>
@@ -467,6 +481,13 @@ export const LabTab = () => {
       >
         <RoutineScheduler />
       </motion.div>
+
+      {/* Evolution Hub Modal */}
+      <EvolutionHub
+        isOpen={showEvolutionHub}
+        onClose={() => setShowEvolutionHub(false)}
+        currentStats={mockUserStats}
+      />
     </div>
   );
 };
