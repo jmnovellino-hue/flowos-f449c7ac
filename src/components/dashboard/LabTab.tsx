@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { RoutineScheduler } from '@/components/lab/RoutineScheduler';
 
 interface WellnessActivity {
   id: string;
@@ -456,6 +457,16 @@ export const LabTab = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Routine Scheduler Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mt-8"
+      >
+        <RoutineScheduler />
+      </motion.div>
     </div>
   );
 };
