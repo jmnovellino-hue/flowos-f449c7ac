@@ -24,6 +24,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { SocialBadgeShare } from './SocialBadgeShare';
 
 interface EvolutionHubProps {
   isOpen: boolean;
@@ -88,6 +89,7 @@ export const EvolutionHub = ({ isOpen, onClose, currentStats }: EvolutionHubProp
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'quests' | 'achievements' | 'leaderboard'>('overview');
   const [selectedClass, setSelectedClass] = useState('sage');
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Calculate XP and level based on stats
   const calculateXP = () => {
@@ -117,29 +119,18 @@ export const EvolutionHub = ({ isOpen, onClose, currentStats }: EvolutionHubProp
   const progressToNext = ((totalXP - currentLevel.xpRequired) / (nextLevel.xpRequired - currentLevel.xpRequired)) * 100;
 
   const handleShareBadge = () => {
-    // Generate share content
-    const shareText = `🏆 I've reached Level ${currentLevel.level} "${currentLevel.title}" in FlowOS! 
+    setShowShareModal(true);
+  };
 
-📊 Stats:
-• ${currentStats.streak} day streak 🔥
-• Top ${100 - currentStats.percentile}% of leaders
-• ${totalXP} XP earned
-
-Join me on the journey of conscious leadership! #FlowOS #H2HInnerLab #Leadership`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: 'My FlowOS Evolution',
-        text: shareText,
-      }).catch(() => {
-        // Fallback to clipboard
-        navigator.clipboard.writeText(shareText);
-        toast.success('Badge copied to clipboard!');
-      });
-    } else {
-      navigator.clipboard.writeText(shareText);
-      toast.success('Badge copied to clipboard!');
-    }
+  const badgeData = {
+    id: `level-${currentLevel.level}`,
+    name: currentLevel.title,
+    title: currentLevel.title,
+    level: currentLevel.level,
+    tier: (currentLevel.level >= 9 ? 'platinum' : currentLevel.level >= 7 ? 'gold' : currentLevel.level >= 4 ? 'silver' : 'bronze') as 'bronze' | 'silver' | 'gold' | 'platinum',
+    xp: totalXP,
+    streak: currentStats.streak,
+    percentile: currentStats.percentile,
   };
 
   const tabs = [
@@ -492,8 +483,15 @@ Join me on the journey of conscious leadership! #FlowOS #H2HInnerLab #Leadership
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </motion.div>
+      </div>
+
+      {/* Social Badge Share Modal */}
+      <SocialBadgeShare
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        badge={badgeData}
+      />
+    </motion.div>
       )}
     </AnimatePresence>
   );

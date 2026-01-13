@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Moon, Utensils, Activity, TrendingUp, Droplets, Wind, BookHeart, Timer, Trophy, Users, Sparkles, Loader2, Check, ChevronRight } from 'lucide-react';
+import { Brain, Moon, Utensils, Activity, TrendingUp, Droplets, Wind, BookHeart, Timer, Trophy, Users, Sparkles, Loader2, Check, ChevronRight, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { RoutineScheduler } from '@/components/lab/RoutineScheduler';
 import { EvolutionHub } from '@/components/gamification/EvolutionHub';
+import { CalendarSync } from '@/components/calendar/CalendarSync';
 
 interface WellnessActivity {
   id: string;
@@ -117,6 +118,7 @@ export const LabTab = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [hasSavedToday, setHasSavedToday] = useState(false);
   const [showEvolutionHub, setShowEvolutionHub] = useState(false);
+  const [showCalendarSync, setShowCalendarSync] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -488,6 +490,23 @@ export const LabTab = () => {
         onClose={() => setShowEvolutionHub(false)}
         currentStats={mockUserStats}
       />
+
+      {/* Calendar Sync Modal */}
+      <CalendarSync
+        isOpen={showCalendarSync}
+        onClose={() => setShowCalendarSync(false)}
+      />
+
+      {/* Calendar Sync FAB */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowCalendarSync(true)}
+        className="fixed bottom-40 md:bottom-24 right-6 z-40 w-12 h-12 rounded-full bg-gradient-to-br from-accent to-primary text-primary-foreground shadow-lg flex items-center justify-center"
+        aria-label="Calendar Sync"
+      >
+        <CalendarDays className="w-5 h-5" />
+      </motion.button>
     </div>
   );
 };
