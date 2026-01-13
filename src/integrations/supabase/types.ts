@@ -253,6 +253,57 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_events: {
+        Row: {
+          attendees: Json | null
+          created_at: string
+          description: string | null
+          end_time: string
+          google_event_id: string
+          id: string
+          impact_rating: number | null
+          location: string | null
+          post_meeting_reflection: string | null
+          pre_meeting_insight: string | null
+          start_time: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attendees?: Json | null
+          created_at?: string
+          description?: string | null
+          end_time: string
+          google_event_id: string
+          id?: string
+          impact_rating?: number | null
+          location?: string | null
+          post_meeting_reflection?: string | null
+          pre_meeting_insight?: string | null
+          start_time: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attendees?: Json | null
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          google_event_id?: string
+          id?: string
+          impact_rating?: number | null
+          location?: string | null
+          post_meeting_reflection?: string | null
+          pre_meeting_insight?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       commitment_logs: {
         Row: {
           commitment_id: string
@@ -401,6 +452,36 @@ export type Database = {
           ended_at?: string | null
           id?: string
           started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      google_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          id: string
+          refresh_token: string | null
+          token_expiry: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          id?: string
+          refresh_token?: string | null
+          token_expiry: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          id?: string
+          refresh_token?: string | null
+          token_expiry?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -584,6 +665,45 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_badges: {
+        Row: {
+          badge_description: string | null
+          badge_id: string
+          badge_name: string
+          badge_tier: string | null
+          earned_at: string
+          id: string
+          last_shared_at: string | null
+          shared_count: number | null
+          user_id: string
+          xp_earned: number | null
+        }
+        Insert: {
+          badge_description?: string | null
+          badge_id: string
+          badge_name: string
+          badge_tier?: string | null
+          earned_at?: string
+          id?: string
+          last_shared_at?: string | null
+          shared_count?: number | null
+          user_id: string
+          xp_earned?: number | null
+        }
+        Update: {
+          badge_description?: string | null
+          badge_id?: string
+          badge_name?: string
+          badge_tier?: string | null
+          earned_at?: string
+          id?: string
+          last_shared_at?: string | null
+          shared_count?: number | null
+          user_id?: string
+          xp_earned?: number | null
         }
         Relationships: []
       }
