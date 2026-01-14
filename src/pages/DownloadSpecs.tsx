@@ -1,4 +1,8 @@
-# FlowOS - Complete Product Specifications & Marketing Guide
+import { Button } from "@/components/ui/button";
+import { Download, FileText, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const specsContent = `# FlowOS - Complete Product Specifications & Marketing Guide
 ## Version 2.0 | January 2026
 
 ---
@@ -31,7 +35,7 @@
 
 ## 1.2 Platform Architecture
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────┐
 │                      FLOWOS PLATFORM                        │
 ├─────────────────────────────────────────────────────────────┤
@@ -49,7 +53,7 @@
 │              └─────────────────────┘                        │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -634,3 +638,61 @@ Deep exploration of your unconscious patterns, triggers, and shadow aspects with
 *Last Updated: January 14, 2026*
 *Prepared for: The H2H Experiment Marketing Team*
 *Confidential - Internal Use Only*
+`;
+
+const DownloadSpecs = () => {
+  const navigate = useNavigate();
+
+  const handleDownload = () => {
+    const blob = new Blob([specsContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'FlowOS-Product-Specs-Marketing-v2.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-card border border-border rounded-xl p-8 text-center space-y-6">
+        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+          <FileText className="w-8 h-8 text-primary" />
+        </div>
+        
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">FlowOS Product Specs</h1>
+          <p className="text-muted-foreground">
+            Complete marketing guide with Features, Advantages, Benefits (FABs), and Customer Journey
+          </p>
+        </div>
+
+        <div className="bg-muted/50 rounded-lg p-4 text-left text-sm space-y-1">
+          <p><strong>Version:</strong> 2.0</p>
+          <p><strong>Format:</strong> Markdown (.md)</p>
+          <p><strong>Last Updated:</strong> January 14, 2026</p>
+        </div>
+
+        <div className="space-y-3">
+          <Button onClick={handleDownload} className="w-full gap-2" size="lg">
+            <Download className="w-5 h-5" />
+            Download Specs Document
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/')} 
+            className="w-full gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to App
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DownloadSpecs;
