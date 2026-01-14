@@ -92,9 +92,33 @@ export const CalendarSync = ({ isOpen, onClose }: CalendarSyncProps) => {
     }
   };
 
-  const handleConnect = () => {
-    // Open backend settings for Google Calendar OAuth
-    toast.info('Google Calendar integration requires OAuth setup in backend settings.');
+  const handleConnect = async () => {
+    try {
+      // Get the OAuth URL from our backend
+      const redirectUri = `${window.location.origin}/calendar-callback`;
+      
+      const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
+        body: { action: 'get_auth_url', redirectUri },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        // OAuth not configured - show helpful message
+        toast.error(data.message || 'Google Calendar OAuth is not configured');
+        return;
+      }
+
+      if (data.authUrl) {
+        // Store state for verification
+        localStorage.setItem('gcal_oauth_state', data.state);
+        // Redirect to Google OAuth
+        window.location.href = data.authUrl;
+      }
+    } catch (error) {
+      console.error('Error starting OAuth:', error);
+      toast.error('Failed to start Google Calendar connection');
+    }
   };
 
   const handleDisconnect = async () => {
