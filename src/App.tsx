@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import BetaLanding from "./pages/BetaLanding";
 import BetaLaunch from "./pages/BetaLaunch";
 import BetaAdmin from "./pages/BetaAdmin";
+import DownloadSpecs from "./pages/DownloadSpecs";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/beta" element={<BetaLanding />} />
             <Route path="/beta/launch" element={<BetaLaunch />} />
             <Route path="/beta/admin" element={<BetaAdmin />} />
+            <Route path="/download-specs" element={<DownloadSpecs />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
