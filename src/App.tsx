@@ -11,6 +11,7 @@ import BetaLanding from "./pages/BetaLanding";
 import BetaLaunch from "./pages/BetaLaunch";
 import BetaAdmin from "./pages/BetaAdmin";
 import DownloadSpecs from "./pages/DownloadSpecs";
+import CalendarCallback from "./pages/CalendarCallback";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/beta/launch" element={<BetaLaunch />} />
             <Route path="/beta/admin" element={<BetaAdmin />} />
             <Route path="/download-specs" element={<DownloadSpecs />} />
+            <Route path="/calendar-callback" element={<CalendarCallback />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

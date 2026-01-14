@@ -82,11 +82,49 @@ serve(async (req) => {
               headers: { ...corsHeaders, "Content-Type": "application/json" },
             });
           }
-          // Would need Google OAuth refresh here - for now return need auth
-          return new Response(JSON.stringify({ error: "Token expired, please reconnect", needsAuth: true }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          
+          // Refresh the token
+          const googleClientId = Deno.env.get("GOOGLE_CLIENT_ID");
+          const googleClientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
+          
+          if (!googleClientId || !googleClientSecret) {
+            return new Response(JSON.stringify({ error: "Google OAuth not configured", needsAuth: true }), {
+              status: 400,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+          
+          const refreshResponse = await fetch("https://oauth2.googleapis.com/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              client_id: googleClientId,
+              client_secret: googleClientSecret,
+              refresh_token: tokenData.refresh_token,
+              grant_type: "refresh_token",
+            }),
           });
+
+          if (!refreshResponse.ok) {
+            console.error("Token refresh failed:", await refreshResponse.text());
+            return new Response(JSON.stringify({ error: "Token expired, please reconnect", needsAuth: true }), {
+              status: 401,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+
+          const newTokens = await refreshResponse.json();
+          currentToken = newTokens.access_token;
+          const newExpiry = new Date(Date.now() + newTokens.expires_in * 1000).toISOString();
+          
+          // Update stored tokens
+          await supabase
+            .from("google_tokens")
+            .update({
+              access_token: newTokens.access_token,
+              token_expiry: newExpiry,
+            })
+            .eq("user_id", user.id);
         }
 
         // Fetch calendar events from Google
