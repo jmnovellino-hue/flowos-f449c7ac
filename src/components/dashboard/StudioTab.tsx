@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Play, Pause, Headphones, Clock, Lock, Brain, Moon, Zap, Volume2, Sparkles, Heart, Podcast, ExternalLink, Bell } from 'lucide-react';
+import { Play, Headphones, Clock, Lock, Brain, Moon, Zap, Volume2, Sparkles, Heart, Podcast, ExternalLink, Bell } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { MeditationBuilder } from '@/components/studio/MeditationBuilder';
@@ -361,11 +361,11 @@ const SPOTIFY_PODCAST_URL = 'https://open.spotify.com/show/2ETfRLDqlvv2kfH6y8vs6
 
 export const StudioTab = () => {
   const [activeCategory, setActiveCategory] = useState<string>('meditation');
-  const [playing, setPlaying] = useState<string | null>(null);
   const [showMeditationBuilder, setShowMeditationBuilder] = useState(false);
   const [showPerformanceBuilder, setShowPerformanceBuilder] = useState(false);
   const [generatedScript, setGeneratedScript] = useState<{ script: string; title: string; category: 'meditation' | 'performance'; backgroundFrequency?: 'nature' | 'elevate' | 'enlightenment' } | null>(null);
   const [viewingSavedScript, setViewingSavedScript] = useState<{ id: string; script: string; title: string; category: 'meditation' | 'performance'; isFavorite: boolean; audioUrl?: string; backgroundFrequency?: string } | null>(null);
+  const [viewingPremadeContent, setViewingPremadeContent] = useState<{ script: string; title: string; category: 'meditation' | 'performance' } | null>(null);
 
   const { scripts, favorites, saveScript, toggleFavorite, loading } = useAudioScripts();
 
@@ -745,18 +745,18 @@ export const StudioTab = () => {
                     <Clock className="w-3 h-3" />
                     <span className="text-xs">{audio.duration}</span>
                   </div>
-                  {!audio.locked && (
+                  {!audio.locked && 'script' in audio && (
                     <Button
                       size="icon"
                       variant="ghost"
                       className="w-10 h-10 rounded-full hover:bg-primary/10"
-                      onClick={() => setPlaying(playing === audio.id ? null : audio.id)}
+                      onClick={() => setViewingPremadeContent({
+                        script: (audio as typeof meditationContent[0]).script,
+                        title: audio.title,
+                        category: activeCategory === 'performance' ? 'performance' : 'meditation'
+                      })}
                     >
-                      {playing === audio.id ? (
-                        <Pause className="w-4 h-4 text-primary" />
-                      ) : (
-                        <Play className="w-4 h-4 text-primary ml-0.5" />
-                      )}
+                      <Play className="w-4 h-4 text-primary ml-0.5" />
                     </Button>
                   )}
                 </div>
@@ -800,6 +800,16 @@ export const StudioTab = () => {
           isFavorite={viewingSavedScript.isFavorite}
           onToggleFavorite={toggleFavorite}
           existingAudioUrl={viewingSavedScript.audioUrl}
+        />
+      )}
+      {viewingPremadeContent && (
+        <ScriptViewer
+          script={viewingPremadeContent.script}
+          title={viewingPremadeContent.title}
+          category={viewingPremadeContent.category}
+          backgroundFrequency="nature"
+          onClose={() => setViewingPremadeContent(null)}
+          onSave={handleSaveScript}
         />
       )}
     </div>

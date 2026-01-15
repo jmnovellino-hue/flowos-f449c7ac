@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Download, Lock, Search, Filter, Star, BookOpen, Brain, Target, Shield, Compass, Users, Flame, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -907,34 +907,190 @@ This is a 12-week intensive for leaders ready to do deep work. Each week builds 
   },
 ];
 
-// Content viewer component
+// Simple markdown-like renderer for resource content
+const renderContent = (content: string) => {
+  const lines = content.split('\n');
+  const elements: React.ReactNode[] = [];
+  let inList = false;
+  let listItems: string[] = [];
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      elements.push(
+        <ul key={`list-${elements.length}`} className="space-y-2 my-4 ml-4">
+          {listItems.map((item, i) => (
+            <li key={i} className="text-muted-foreground flex items-start gap-2">
+              <span className="text-primary mt-1.5">•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      );
+      listItems = [];
+    }
+    inList = false;
+  };
+
+  lines.forEach((line, index) => {
+    const trimmedLine = line.trim();
+    
+    // Empty line
+    if (!trimmedLine) {
+      flushList();
+      return;
+    }
+
+    // H1 heading
+    if (trimmedLine.startsWith('# ')) {
+      flushList();
+      elements.push(
+        <h1 key={index} className="text-2xl font-display font-bold text-foreground mt-6 mb-4 pb-2 border-b border-border">
+          {trimmedLine.slice(2)}
+        </h1>
+      );
+      return;
+    }
+
+    // H2 heading
+    if (trimmedLine.startsWith('## ')) {
+      flushList();
+      elements.push(
+        <h2 key={index} className="text-xl font-display font-semibold text-foreground mt-6 mb-3 text-primary">
+          {trimmedLine.slice(3)}
+        </h2>
+      );
+      return;
+    }
+
+    // H3 heading
+    if (trimmedLine.startsWith('### ')) {
+      flushList();
+      elements.push(
+        <h3 key={index} className="text-lg font-semibold text-foreground mt-4 mb-2">
+          {trimmedLine.slice(4)}
+        </h3>
+      );
+      return;
+    }
+
+    // Horizontal rule
+    if (trimmedLine === '---') {
+      flushList();
+      elements.push(<hr key={index} className="my-6 border-border" />);
+      return;
+    }
+
+    // Blockquote (italicized quotes)
+    if (trimmedLine.startsWith('*"') || trimmedLine.startsWith('*')) {
+      flushList();
+      const quoteText = trimmedLine.replace(/^\*["']?|["']?\*$/g, '').replace(/^\*|$/g, '');
+      elements.push(
+        <blockquote key={index} className="my-4 pl-4 border-l-2 border-primary/50 italic text-muted-foreground">
+          {quoteText}
+        </blockquote>
+      );
+      return;
+    }
+
+    // List item
+    if (trimmedLine.startsWith('- ') || trimmedLine.match(/^\d+\.\s/)) {
+      inList = true;
+      const itemText = trimmedLine.replace(/^-\s|^\d+\.\s/, '');
+      listItems.push(itemText);
+      return;
+    }
+
+    // Bold text in paragraphs
+    if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+      flushList();
+      elements.push(
+        <p key={index} className="text-foreground font-semibold my-3">
+          {trimmedLine.slice(2, -2)}
+        </p>
+      );
+      return;
+    }
+
+    // Regular paragraph
+    flushList();
+    elements.push(
+      <p key={index} className="text-muted-foreground leading-relaxed my-3">
+        {trimmedLine}
+      </p>
+    );
+  });
+
+  flushList();
+  return elements;
+};
+
+// Content viewer component with proper document styling
 const ResourceViewer = ({ resource, onClose }: { resource: Resource; onClose: () => void }) => (
   <Dialog open={true} onOpenChange={onClose}>
-    <DialogContent className="max-w-3xl max-h-[85vh]">
-      <DialogHeader>
-        <DialogTitle className="text-xl font-display">{resource.title}</DialogTitle>
-      </DialogHeader>
-      <ScrollArea className="h-[60vh] pr-4">
-        <div className="prose prose-invert max-w-none">
-          <pre className="whitespace-pre-wrap font-sans text-sm text-muted-foreground leading-relaxed">
-            {resource.content}
-          </pre>
+    <DialogContent className="max-w-3xl max-h-[85vh] p-0 overflow-hidden">
+      {/* Document header */}
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-6 py-4">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            {resource.icon && (
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/10 flex items-center justify-center flex-shrink-0">
+                <resource.icon className="w-5 h-5 text-primary" />
+              </div>
+            )}
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2 py-0.5 rounded-md bg-primary/10 text-xs font-medium text-primary">
+                  {resource.category}
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-muted text-xs font-medium text-muted-foreground">
+                  {resource.type}
+                </span>
+              </div>
+              <DialogTitle className="text-xl font-display">{resource.title}</DialogTitle>
+            </div>
+          </div>
+        </DialogHeader>
+      </div>
+      
+      {/* Document content */}
+      <ScrollArea className="h-[60vh]">
+        <div className="px-8 py-6">
+          {/* Description banner */}
+          <div className="glass-surface rounded-xl p-4 mb-6 border-l-4 border-primary">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {resource.description}
+            </p>
+          </div>
+          
+          {/* Main content */}
+          <div className="document-content">
+            {resource.content && renderContent(resource.content)}
+          </div>
         </div>
       </ScrollArea>
-      <div className="flex justify-end gap-2 mt-4">
-        <Button variant="outline" onClick={onClose}>Close</Button>
-        <Button onClick={() => {
-          const blob = new Blob([resource.content || ''], { type: 'text/markdown' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${resource.title.toLowerCase().replace(/\s+/g, '-')}.md`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }}>
-          <Download className="w-4 h-4 mr-2" />
-          Download
-        </Button>
+      
+      {/* Document footer */}
+      <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm border-t border-border px-6 py-4">
+        <div className="flex justify-between items-center">
+          <p className="text-xs text-muted-foreground">
+            © The H2H Experiment • For personal use only
+          </p>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>Close</Button>
+            <Button onClick={() => {
+              const blob = new Blob([resource.content || ''], { type: 'text/markdown' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `${resource.title.toLowerCase().replace(/\s+/g, '-')}.md`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
+        </div>
       </div>
     </DialogContent>
   </Dialog>

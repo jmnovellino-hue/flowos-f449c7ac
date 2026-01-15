@@ -24,11 +24,34 @@ interface HomeTabProps {
   onNavigateToProfile?: () => void;
 }
 
-const dailyWisdom = {
-  quote: "Until you make the unconscious conscious, it will direct your life and you will call it fate.",
-  author: "Carl Jung",
-  category: "The H2H Experiment"
+// Rotating daily wisdom quotes
+const wisdomQuotes = [
+  { quote: "Until you make the unconscious conscious, it will direct your life and you will call it fate.", author: "Carl Jung", category: "Shadow Work" },
+  { quote: "Between stimulus and response there is a space. In that space is our power to choose our response.", author: "Viktor Frankl", category: "Choice" },
+  { quote: "The obstacle is the way.", author: "Marcus Aurelius", category: "Stoicism" },
+  { quote: "What stands in the way becomes the way.", author: "Ryan Holiday", category: "Adversity" },
+  { quote: "The quality of your life is the quality of your relationships.", author: "Esther Perel", category: "Connection" },
+  { quote: "Vulnerability is the birthplace of innovation, creativity, and change.", author: "Brené Brown", category: "Courage" },
+  { quote: "People don't buy what you do; they buy why you do it.", author: "Simon Sinek", category: "Purpose" },
+  { quote: "You do not rise to the level of your goals. You fall to the level of your systems.", author: "James Clear", category: "Habits" },
+  { quote: "The way you do anything is the way you do everything.", author: "Zen Proverb", category: "Mindfulness" },
+  { quote: "Leadership is not about being in charge. It's about taking care of those in your charge.", author: "Simon Sinek", category: "Leadership" },
+  { quote: "The cave you fear to enter holds the treasure you seek.", author: "Joseph Campbell", category: "Hero's Journey" },
+  { quote: "He who has a why to live can bear almost any how.", author: "Friedrich Nietzsche", category: "Meaning" },
+  { quote: "The privilege of a lifetime is to become who you truly are.", author: "Carl Jung", category: "Individuation" },
+  { quote: "It is not the strongest of the species that survives, but the most adaptable.", author: "Charles Darwin", category: "Adaptation" },
+];
+
+// Get a quote based on the day of year for consistent daily rotation
+const getDailyWisdom = () => {
+  const now = new Date();
+  const startOfYear = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - startOfYear.getTime();
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return wisdomQuotes[dayOfYear % wisdomQuotes.length];
 };
+
+const dailyWisdom = getDailyWisdom();
 
 export const HomeTab = ({ userProfile, userId, onNavigateToProfile }: HomeTabProps) => {
   const [sleepQuality, setSleepQuality] = useState(7);
@@ -123,34 +146,34 @@ export const HomeTab = ({ userProfile, userId, onNavigateToProfile }: HomeTabPro
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-surface rounded-2xl p-8 relative overflow-hidden"
+            className="glass-surface rounded-2xl p-6 relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
             <div className="relative">
-              <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-2 mb-4">
                 <Quote className="w-5 h-5 text-primary" />
                 <span className="text-xs font-medium text-primary uppercase tracking-wider">
                   Daily Wisdom
                 </span>
                 <span className="ml-auto text-xs text-muted-foreground">{dailyWisdom.category}</span>
               </div>
-              <blockquote className="text-xl md:text-2xl font-display text-foreground leading-relaxed mb-4">
+              <blockquote className="text-lg md:text-xl font-display text-foreground leading-relaxed mb-3">
                 "{dailyWisdom.quote}"
               </blockquote>
-              <cite className="text-muted-foreground not-italic">
+              <cite className="text-muted-foreground not-italic text-sm">
                 — {dailyWisdom.author}
               </cite>
             </div>
           </motion.div>
 
-          {/* Commitment Tracker */}
-          <CommitmentTracker expanded={false} />
+          {/* Daily Journal - Core habit, positioned prominently */}
+          <JournalingSection userId={userId} />
 
           {/* Micro-Experiments */}
           <MicroExperimentsSection />
 
-          {/* Daily Journal */}
-          <JournalingSection userId={userId} />
+          {/* Commitment Tracker */}
+          <CommitmentTracker expanded={false} />
         </div>
 
         {/* Side Column */}
