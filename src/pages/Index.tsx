@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { AuthScreen } from '@/components/auth/AuthScreen';
 import { JourneyIntro } from '@/components/onboarding/JourneyIntro';
 import { AssessmentFlow } from '@/components/onboarding/AssessmentFlow';
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { HomeTab } from '@/components/dashboard/HomeTab';
 import { CodexTab } from '@/components/dashboard/CodexTab';
@@ -30,6 +31,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [showTour, setShowTour] = useState(false);
   const [userProfile, setUserProfile] = useState({
     name: 'Leader',
     archetype: 'The Hero',
@@ -158,6 +160,12 @@ const Index = () => {
       }));
 
       setAppState('dashboard');
+      
+      // Show tour for new users (after onboarding)
+      const tourCompleted = localStorage.getItem('h2h_tour_completed');
+      if (!tourCompleted) {
+        setShowTour(true);
+      }
     } catch (error) {
       console.error('Error saving assessment:', error);
       // Still proceed to dashboard
@@ -251,6 +259,14 @@ const Index = () => {
         {renderDashboardContent()}
       </DashboardLayout>
       <QuantumBubbleButton />
+      
+      {/* Onboarding Tour */}
+      {showTour && (
+        <OnboardingTour
+          onComplete={() => setShowTour(false)}
+          onDismiss={() => setShowTour(false)}
+        />
+      )}
     </>
   );
 };
