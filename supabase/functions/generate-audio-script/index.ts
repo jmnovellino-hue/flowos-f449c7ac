@@ -79,13 +79,14 @@ CRITICAL RULES:
 6. Start speaking directly to the listener immediately
 7. Use ... (ellipsis) for natural breathing pauses
 8. Use [pause] only for longer 3-5 second silence moments
+9. ALWAYS start with a warm welcome to FlowOS Studio and introduce yourself as the guide
 
 The meditation should be approximately ${duration} minutes when read aloud at a slow, calm pace. 
 
 Write in second person ("you"), present tense, with warm and gentle language.`;
 
       const sections = [];
-      sections.push("A gentle welcome inviting them to settle and close their eyes");
+      sections.push("A warm welcome: 'Welcome to FlowOS Studio. I'm your guide for this meditation journey. Before we begin, take a moment to settle into a comfortable position...'");
       if (decompress) sections.push("Three deep breaths: 4 seconds inhale, 4 hold, 8 exhale - describe each with imagery of releasing tension");
       if (grounding) sections.push("Body awareness grounding - feeling weight, connection to earth, being fully present");
       if (selfAffirmation) sections.push(`3-5 affirmations about "${selfAffirmation}" in present tense for them to repeat silently`);
@@ -97,14 +98,16 @@ Write in second person ("you"), present tense, with warm and gentle language.`;
 
 ${sections.join("\n")}
 
-Remember: Write ONLY the spoken words. No titles. No section headers. No formatting. Just the meditation narration that flows as one continuous, peaceful journey. Start immediately with "Welcome..." or "Gently..." - do not start with a title.`;
+Remember: Write ONLY the spoken words. No titles. No section headers. No formatting. Just the meditation narration that flows as one continuous, peaceful journey. Start immediately with a warm welcome to FlowOS Studio.`;
 
     } else if (config.type === 'performance') {
       const { situation } = config;
       
-      systemPrompt = `You are a wise, grounded mentor and performance coach. Your tone adapts to the situation - calm yet confident for high-pressure moments, warm and understanding for emotional challenges. You provide practical wisdom drawn from philosophy, psychology, and real-world experience. Speak directly to the listener as if you're their trusted advisor.`;
+      systemPrompt = `You are a wise, grounded mentor and performance coach. Your tone adapts to the situation - calm yet confident for high-pressure moments, warm and understanding for emotional challenges. You provide practical wisdom drawn from philosophy, psychology, and real-world experience. Speak directly to the listener as if you're their trusted advisor. ALWAYS start by welcoming them to FlowOS Studio and introducing yourself.`;
 
       userPrompt = `Create a 3-4 minute audio script to prepare someone for: "${situation}"
+
+Start with: "Welcome to FlowOS Studio. I'm here to help you prepare for what's ahead..."
 
 Structure:
 1. Acknowledge the Challenge (30 sec): Validate what they're facing without dramatizing it. Normalize the difficulty.

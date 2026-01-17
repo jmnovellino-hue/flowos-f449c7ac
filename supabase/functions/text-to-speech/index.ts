@@ -37,7 +37,7 @@ serve(async (req) => {
       );
     }
 
-    const { text, voiceId = "EXAVITQu4vr4xnSDxMaL" } = await req.json(); // Sarah voice
+    const { text, voiceId = "FGY2WhTYpPnrIDTdsKH5" } = await req.json(); // Default to Laura voice
     const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
 
     if (!ELEVENLABS_API_KEY) {
@@ -51,9 +51,16 @@ serve(async (req) => {
     // Truncate text if too long (ElevenLabs limit is 5000 chars)
     const truncatedText = text.length > 5000 ? text.substring(0, 5000) : text;
 
-    // Use Laura voice for calm, relaxing meditation narration
-    const meditationVoiceId = "FGY2WhTYpPnrIDTdsKH5"; // Laura - calm female voice
-    const selectedVoice = voiceId === "EXAVITQu4vr4xnSDxMaL" ? meditationVoiceId : voiceId;
+    // Voice options with calm, slow settings
+    // Available voices for meditation/relaxation:
+    // - FGY2WhTYpPnrIDTdsKH5: Laura - calm female voice (default)
+    // - SAz9YHcvj6GT2YYXdXww: River - warm male voice
+    // - pFZP5JQG7iQjIQuC4Bku: Lily - gentle female voice
+    // - nPczCjzI2devNBz1zQrb: Brian - soothing male voice
+    // - XrExE9yKIg1WjnnlVkGX: Matilda - calm female voice
+    // - onwK4e9ZLuTAKqWW03F9: Daniel - warm male voice
+
+    const selectedVoice = voiceId;
 
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoice}?output_format=mp3_44100_128`,
@@ -67,11 +74,11 @@ serve(async (req) => {
           text: truncatedText,
           model_id: "eleven_multilingual_v2",
           voice_settings: {
-            stability: 0.85,        // Higher stability for calmer, more consistent voice
-            similarity_boost: 0.6,  // Slightly reduced for softer sound
-            style: 0.15,            // Low style for gentle, understated delivery
+            stability: 0.9,         // Very high stability for calmer, more consistent voice
+            similarity_boost: 0.5,  // Reduced for softer, gentler sound
+            style: 0.1,             // Very low style for gentle, understated delivery
             use_speaker_boost: false, // Disabled for softer, more intimate sound
-            speed: 0.75,            // Slower pace for relaxation
+            speed: 0.7,             // Even slower pace for deep relaxation
           },
         }),
       }

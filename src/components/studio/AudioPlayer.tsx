@@ -12,11 +12,30 @@ interface AudioPlayerProps {
   backgroundFrequency?: 'nature' | 'elevate' | 'enlightenment';
 }
 
-// Binaural frequency audio URLs (royalty-free frequencies)
-const FREQUENCY_URLS: Record<string, string> = {
-  nature: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8cb749d484.mp3', // 432Hz ambient
-  elevate: 'https://cdn.pixabay.com/download/audio/2022/01/20/audio_8b2af3cc03.mp3', // Ambient meditation
-  enlightenment: 'https://cdn.pixabay.com/download/audio/2021/04/06/audio_f927d5c6ee.mp3', // Higher frequency ambient
+// Nature background sounds - calming and relaxing
+const NATURE_SOUNDS: Record<string, string[]> = {
+  nature: [
+    'https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3', // Forest birds
+    'https://cdn.pixabay.com/download/audio/2021/08/09/audio_dce1dee36d.mp3', // Rain sounds
+    'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3', // Ocean waves
+    'https://cdn.pixabay.com/download/audio/2021/10/19/audio_75cc4dc63d.mp3', // Gentle stream
+  ],
+  elevate: [
+    'https://cdn.pixabay.com/download/audio/2022/01/20/audio_8b2af3cc03.mp3', // Ambient meditation
+    'https://cdn.pixabay.com/download/audio/2023/04/19/audio_6940809be2.mp3', // Soft ambient
+    'https://cdn.pixabay.com/download/audio/2022/08/02/audio_884fe92c21.mp3', // Peaceful ambient
+  ],
+  enlightenment: [
+    'https://cdn.pixabay.com/download/audio/2021/04/06/audio_f927d5c6ee.mp3', // Higher frequency
+    'https://cdn.pixabay.com/download/audio/2022/03/15/audio_8cb749d484.mp3', // 432Hz ambient
+    'https://cdn.pixabay.com/download/audio/2023/03/20/audio_10f76ae9b7.mp3', // Cosmic ambient
+  ],
+};
+
+// Get a random sound from the category
+const getRandomSound = (category: string): string => {
+  const sounds = NATURE_SOUNDS[category] || NATURE_SOUNDS.nature;
+  return sounds[Math.floor(Math.random() * sounds.length)];
 };
 
 export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false, backgroundFrequency }: AudioPlayerProps) => {
@@ -29,12 +48,13 @@ export const AudioPlayer = ({ audioUrl, title, onClose, autoPlay = false, backgr
   const [volume, setVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
 
-  // Initialize background audio
+  // Initialize background audio with random nature sound
   useEffect(() => {
-    if (backgroundFrequency && FREQUENCY_URLS[backgroundFrequency]) {
-      const bgAudio = new Audio(FREQUENCY_URLS[backgroundFrequency]);
+    if (backgroundFrequency && NATURE_SOUNDS[backgroundFrequency]) {
+      const soundUrl = getRandomSound(backgroundFrequency);
+      const bgAudio = new Audio(soundUrl);
       bgAudio.loop = true;
-      bgAudio.volume = 0.3; // Lower volume for background
+      bgAudio.volume = 0.25; // Lower volume for background - more subtle
       bgAudioRef.current = bgAudio;
 
       return () => {
