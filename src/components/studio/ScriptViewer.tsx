@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { AudioPlayer } from './AudioPlayer';
+import { VoiceSelector, VOICE_OPTIONS } from './VoiceSelector';
 
 interface ScriptViewerProps {
   script: string;
@@ -55,6 +56,8 @@ export const ScriptViewer = ({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [localScriptId, setLocalScriptId] = useState<string | null>(savedScriptId || null);
+  const [selectedVoice, setSelectedVoice] = useState(VOICE_OPTIONS[0].id);
+  const [showVoiceSelector, setShowVoiceSelector] = useState(false);
 
   // Load existing audio from private storage bucket
   useEffect(() => {
@@ -143,7 +146,7 @@ export const ScriptViewer = ({
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
             Authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({ text: script }),
+          body: JSON.stringify({ text: script, voiceId: selectedVoice }),
         }
       );
 
@@ -221,29 +224,51 @@ export const ScriptViewer = ({
             <AudioPlayer audioUrl={audioUrl} title={title} autoPlay backgroundFrequency={backgroundFrequency} />
           </div>
         ) : (
-          <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground">Generate Audio</p>
-                <p className="text-xs text-muted-foreground">Convert this script to a calming voice</p>
+          <div className="mb-4 space-y-4">
+            {/* Voice Selection Toggle */}
+            <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Generate Audio</p>
+                  <p className="text-xs text-muted-foreground">Convert this script to a calming voice narration</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowVoiceSelector(!showVoiceSelector)}
+                >
+                  {showVoiceSelector ? 'Hide Voices' : 'Choose Voice'}
+                </Button>
               </div>
-              <Button
-                onClick={handleGenerateAudio}
-                disabled={isGeneratingAudio}
-                className="gap-2"
-              >
-                {isGeneratingAudio ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" />
-                    Generate Audio
-                  </>
-                )}
-              </Button>
+              
+              {showVoiceSelector && (
+                <div className="mb-4">
+                  <VoiceSelector selectedVoice={selectedVoice} onSelect={setSelectedVoice} />
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-muted-foreground">
+                  Selected: <span className="text-primary font-medium">{VOICE_OPTIONS.find(v => v.id === selectedVoice)?.name || 'Laura'}</span>
+                </p>
+                <Button
+                  onClick={handleGenerateAudio}
+                  disabled={isGeneratingAudio}
+                  className="gap-2"
+                >
+                  {isGeneratingAudio ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4" />
+                      Generate Audio
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         )}

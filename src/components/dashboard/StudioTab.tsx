@@ -359,13 +359,19 @@ const podcastEpisodes = [
 
 const SPOTIFY_PODCAST_URL = 'https://open.spotify.com/show/2ETfRLDqlvv2kfH6y8vs69?si=34acb65b2294464c';
 
+// Random background frequency for variety
+const getRandomBackgroundFrequency = (): 'nature' | 'elevate' | 'enlightenment' => {
+  const frequencies: ('nature' | 'elevate' | 'enlightenment')[] = ['nature', 'elevate', 'enlightenment'];
+  return frequencies[Math.floor(Math.random() * frequencies.length)];
+};
+
 export const StudioTab = () => {
   const [activeCategory, setActiveCategory] = useState<string>('meditation');
   const [showMeditationBuilder, setShowMeditationBuilder] = useState(false);
   const [showPerformanceBuilder, setShowPerformanceBuilder] = useState(false);
   const [generatedScript, setGeneratedScript] = useState<{ script: string; title: string; category: 'meditation' | 'performance'; backgroundFrequency?: 'nature' | 'elevate' | 'enlightenment' } | null>(null);
-  const [viewingSavedScript, setViewingSavedScript] = useState<{ id: string; script: string; title: string; category: 'meditation' | 'performance'; isFavorite: boolean; audioUrl?: string; backgroundFrequency?: string } | null>(null);
-  const [viewingPremadeContent, setViewingPremadeContent] = useState<{ script: string; title: string; category: 'meditation' | 'performance' } | null>(null);
+  const [viewingSavedScript, setViewingSavedScript] = useState<{ id: string; script: string; title: string; category: 'meditation' | 'performance'; isFavorite: boolean; audioUrl?: string; backgroundFrequency?: 'nature' | 'elevate' | 'enlightenment' } | null>(null);
+  const [viewingPremadeContent, setViewingPremadeContent] = useState<{ script: string; title: string; category: 'meditation' | 'performance'; backgroundFrequency: 'nature' | 'elevate' | 'enlightenment' } | null>(null);
 
   const { scripts, favorites, saveScript, toggleFavorite, loading } = useAudioScripts();
 
@@ -753,7 +759,8 @@ export const StudioTab = () => {
                       onClick={() => setViewingPremadeContent({
                         script: (audio as typeof meditationContent[0]).script,
                         title: audio.title,
-                        category: activeCategory === 'performance' ? 'performance' : 'meditation'
+                        category: activeCategory === 'performance' ? 'performance' : 'meditation',
+                        backgroundFrequency: getRandomBackgroundFrequency()
                       })}
                     >
                       <Play className="w-4 h-4 text-primary ml-0.5" />
@@ -807,7 +814,7 @@ export const StudioTab = () => {
           script={viewingPremadeContent.script}
           title={viewingPremadeContent.title}
           category={viewingPremadeContent.category}
-          backgroundFrequency="nature"
+          backgroundFrequency={viewingPremadeContent.backgroundFrequency}
           onClose={() => setViewingPremadeContent(null)}
           onSave={handleSaveScript}
         />
